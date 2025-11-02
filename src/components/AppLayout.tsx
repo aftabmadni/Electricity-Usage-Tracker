@@ -1,0 +1,209 @@
+import React, { useState } from 'react';
+import { 
+  Home, 
+  BarChart3, 
+  CreditCard, 
+  Settings, 
+  Menu,
+  X,
+  Bell,
+  LogOut,
+  User,
+  Zap
+} from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { Badge } from './ui/badge';
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+  currentPage: 'dashboard' | 'reports' | 'payments' | 'settings';
+  onNavigate: (page: 'dashboard' | 'reports' | 'payments' | 'settings') => void;
+  notificationCount?: number;
+  onNotificationClick?: () => void;
+}
+
+export const AppLayout: React.FC<AppLayoutProps> = ({ 
+  children, 
+  currentPage,
+  onNavigate,
+  notificationCount = 0,
+  onNotificationClick
+}) => {
+  const { user, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navigation = [
+    { id: 'dashboard' as const, name: 'Dashboard', icon: Home },
+    { id: 'reports' as const, name: 'Reports', icon: BarChart3 },
+    { id: 'payments' as const, name: 'Payments', icon: CreditCard },
+    { id: 'settings' as const, name: 'Settings', icon: Settings },
+  ];
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-3 md:px-6">
+          {/* Logo and Brand */}
+          <div className="flex items-center gap-2">
+            <button
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                WattWise
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon size={20} />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* User Menu */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={onNotificationClick}
+              aria-label="Notifications"
+            >
+              <Bell size={20} />
+              {notificationCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {notificationCount}
+                </Badge>
+              )}
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:inline text-sm">{user?.name}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span>{user?.name}</span>
+                    <span className="text-xs text-gray-500">{user?.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onNavigate('settings')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden border-t border-gray-200 bg-white">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    onNavigate(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-3 w-full px-4 py-3 transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon size={20} />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-8">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <footer className="mt-auto border-t border-gray-200 bg-white py-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Zap className="w-4 h-4 text-blue-600" />
+              <span>© 2024 WattWise. All rights reserved.</span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-600">
+              <button className="hover:text-blue-600 transition-colors">Privacy Policy</button>
+              <button className="hover:text-blue-600 transition-colors">Terms of Service</button>
+              <button className="hover:text-blue-600 transition-colors">Contact</button>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};

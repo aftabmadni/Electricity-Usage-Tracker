@@ -1,0 +1,152 @@
+import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LoginPage } from './components/LoginPage';
+import { RegisterPage } from './components/RegisterPage';
+import { ForgotPasswordPage } from './components/ForgotPasswordPage';
+import { AppLayout } from './components/AppLayout';
+import { DashboardPage } from './components/DashboardPage';
+import { ReportsPage } from './components/ReportsPage';
+import { PaymentsPage } from './components/PaymentsPage';
+import { SettingsPage } from './components/SettingsPage';
+import { NotificationCenter } from './components/NotificationCenter';
+import { Toaster } from './components/ui/sonner';
+import { notificationsApi, insightsApi } from './lib/mockApi';
+
+type AuthScreen = 'login' | 'register' | 'forgot-password';
+type AppPage = 'dashboard' | 'reports' | 'payments' | 'settings';
+
+function AppContent() {
+  const { user, loading, isAuthenticated } = useAuth();
+  const [authScreen, setAuthScreen] = useState<AuthScreen>('login');
+  const [currentPage, setCurrentPage] = useState<AppPage>('dashboard');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [prediction, setPrediction] = useState<any>(null);
+
+  // Load notifications and prediction on mount
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      loadNotifications();
+      loadPrediction();
+    }
+  }, [isAuthenticated]);
+
+  const loadNotifications = async () => {
+    try {
+      const data = await notificationsApi.getNotifications();
+      setNotifications(data);
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  };
+
+  const loadPrediction = async () => {
+    try {
+      const data = await insightsApi.getPrediction();
+      setPrediction(data);
+    } catch (error) {
+      console.error('Failed to load prediction:', error);
+    }
+  };
+
+  const handleMarkNotificationAsRead = async (id: string) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications(notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      ));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  const handleMarkAllNotificationsAsRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead();
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  };
+
+  const handleNotificationNavigate = (path: string) => {
+    if (path === '/dashboard') setCurrentPage('dashboard');
+    else if (path === '/payments') setCurrentPage('payments');
+    else if (path === '/settings') setCurrentPage('settings');
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading WattWise...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth screens if not authenticated
+  if (!isAuthenticated) {
+    switch (authScreen) {
+      case 'register':
+        return <RegisterPage onSwitchToLogin={() => setAuthScreen('login')} />;
+      case 'forgot-password':
+        return <ForgotPasswordPage onBackToLogin={() => setAuthScreen('login')} />;
+      default:
+        return (
+          <LoginPage
+            onSwitchToRegister={() => setAuthScreen('register')}
+            onSwitchToForgotPassword={() => setAuthScreen('forgot-password')}
+          />
+        );
+    }
+  }
+
+  // Get user preferences
+  const currency = user?.preferences.currency || 'INR';
+  const unreadNotifications = notifications.filter(n => !n.read).length;
+
+  // Render main app
+  return (
+    <>
+      <AppLayout
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        notificationCount={unreadNotifications}
+        onNotificationClick={() => setShowNotifications(true)}
+      >
+        {currentPage === 'dashboard' && <DashboardPage currency={currency} />}
+        {currentPage === 'reports' && <ReportsPage />}
+        {currentPage === 'payments' && (
+          <PaymentsPage
+            predictedBill={prediction?.predictedCost || 2284}
+            actualBill={2410}
+            currency={currency}
+          />
+        )}
+        {currentPage === 'settings' && <SettingsPage />}
+      </AppLayout>
+
+      <NotificationCenter
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        notifications={notifications}
+        onMarkAsRead={handleMarkNotificationAsRead}
+        onMarkAllAsRead={handleMarkAllNotificationsAsRead}
+        onNavigate={handleNotificationNavigate}
+      />
+
+      <Toaster position="top-right" richColors />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
