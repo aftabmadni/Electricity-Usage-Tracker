@@ -7,6 +7,7 @@ import { DeviceBreakdownChart } from './DeviceBreakdownChart';
 import { CarbonFootprintGauge } from './CarbonFootprintGauge';
 import { SavingStreakWidget } from './SavingStreakWidget';
 import { AIInsightsBox } from './AIInsightsBox';
+import { ApplianceManagementSection } from './ApplianceManagementSection';
 import { usageApi, insightsApi } from '../lib/mockApi';
 import { 
   UsageData, 
@@ -20,6 +21,8 @@ import {
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { BarChart3, Zap } from 'lucide-react';
 
 interface DashboardPageProps {
   currency: 'INR' | 'USD' | 'EUR';
@@ -149,57 +152,79 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
         </p>
       </div>
 
-      {/* Usage Summary Cards */}
-      {todayUsage && weekUsage && monthUsage && (
-        <UsageSummaryCards
-          today={todayUsage}
-          week={weekUsage}
-          month={monthUsage}
-          currency={currency}
-        />
-      )}
+      {/* Tabs for different sections */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="overview" className="gap-2">
+            <BarChart3 size={16} />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="appliances" className="gap-2">
+            <Zap size={16} />
+            My Appliances
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Power Timeline Chart */}
-      <PowerTimelineChart data={usageData} currency={currency} />
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Usage Summary Cards */}
+          {todayUsage && weekUsage && monthUsage && (
+            <UsageSummaryCards
+              today={todayUsage}
+              week={weekUsage}
+              month={monthUsage}
+              currency={currency}
+            />
+          )}
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* AI Insights */}
-        <AIInsightsBox 
-          insights={insights} 
-          onMarkAsRead={handleMarkInsightAsRead}
-        />
+          {/* Power Timeline Chart */}
+          <PowerTimelineChart data={usageData} currency={currency} />
 
-        {/* Saving Streak */}
-        {savingStreak && <SavingStreakWidget streak={savingStreak} />}
-      </div>
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* AI Insights */}
+            <AIInsightsBox 
+              insights={insights} 
+              onMarkAsRead={handleMarkInsightAsRead}
+            />
 
-      {/* Prediction Chart */}
-      {prediction && monthUsage && (
-        <PredictionChart
-          prediction={prediction}
-          currentMonthUsage={monthUsage.totalUnits}
-          currency={currency}
-        />
-      )}
+            {/* Saving Streak */}
+            {savingStreak && <SavingStreakWidget streak={savingStreak} />}
+          </div>
 
-      {/* Comparison and Device Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Month Comparison */}
-        {monthUsage && previousMonthUsage && (
-          <ComparisonChart
-            currentMonth={{ units: monthUsage.totalUnits, cost: monthUsage.totalCost }}
-            previousMonth={{ units: previousMonthUsage.totalUnits, cost: previousMonthUsage.totalCost }}
-            currency={currency}
-          />
-        )}
+          {/* Prediction Chart */}
+          {prediction && monthUsage && (
+            <PredictionChart
+              prediction={prediction}
+              currentMonthUsage={monthUsage.totalUnits}
+              currency={currency}
+            />
+          )}
 
-        {/* Device Breakdown */}
-        <DeviceBreakdownChart devices={devices} currency={currency} />
-      </div>
+          {/* Comparison and Device Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Month Comparison */}
+            {monthUsage && previousMonthUsage && (
+              <ComparisonChart
+                currentMonth={{ units: monthUsage.totalUnits, cost: monthUsage.totalCost }}
+                previousMonth={{ units: previousMonthUsage.totalUnits, cost: previousMonthUsage.totalCost }}
+                currency={currency}
+              />
+            )}
 
-      {/* Carbon Footprint */}
-      {carbonFootprint && <CarbonFootprintGauge footprint={carbonFootprint} />}
+            {/* Device Breakdown */}
+            <DeviceBreakdownChart devices={devices} currency={currency} />
+          </div>
+
+          {/* Carbon Footprint */}
+          {carbonFootprint && <CarbonFootprintGauge footprint={carbonFootprint} />}
+        </TabsContent>
+
+        {/* Appliances Tab */}
+        <TabsContent value="appliances">
+          <ApplianceManagementSection currency={currency} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

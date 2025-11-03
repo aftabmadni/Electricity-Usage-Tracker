@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ApplianceProvider, useAppliances } from './contexts/ApplianceContext';
 import { LoginPage } from './components/LoginPage';
 import { RegisterPage } from './components/RegisterPage';
 import { ForgotPasswordPage } from './components/ForgotPasswordPage';
+import { OnboardingPage } from './components/OnboardingPage';
 import { AppLayout } from './components/AppLayout';
 import { DashboardPage } from './components/DashboardPage';
 import { ReportsPage } from './components/ReportsPage';
@@ -16,7 +18,8 @@ type AuthScreen = 'login' | 'register' | 'forgot-password';
 type AppPage = 'dashboard' | 'reports' | 'payments' | 'settings';
 
 function AppContent() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { hasCompletedOnboarding, loading: applianceLoading } = useAppliances();
   const [authScreen, setAuthScreen] = useState<AuthScreen>('login');
   const [currentPage, setCurrentPage] = useState<AppPage>('dashboard');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -76,7 +79,7 @@ function AppContent() {
   };
 
   // Show loading state
-  if (loading) {
+  if (authLoading || applianceLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
         <div className="text-center">
@@ -102,6 +105,11 @@ function AppContent() {
           />
         );
     }
+  }
+
+  // Show onboarding if user hasn't completed it
+  if (!hasCompletedOnboarding) {
+    return <OnboardingPage />;
   }
 
   // Get user preferences
@@ -146,7 +154,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ApplianceProvider>
+        <AppContent />
+      </ApplianceProvider>
     </AuthProvider>
   );
 }

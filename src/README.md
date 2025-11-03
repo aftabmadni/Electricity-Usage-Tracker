@@ -15,6 +15,17 @@ WattWise is a comprehensive, production-ready web application for tracking and o
 - **Google OAuth** integration (UI ready)
 - **JWT-based** session management
 
+### ⚡ NEW: Appliance Management & Onboarding
+- **Smart Onboarding Flow**: First-time users add appliances with guided setup
+- **Quick Add Templates**: Pre-filled common appliances (AC, Refrigerator, etc.)
+- **Appliance Tracking**: Add, edit, and delete appliances dynamically
+- **Real-time Calculations**: Automatic kWh and cost calculations based on usage
+- **Interactive Charts**: Visual comparison of energy usage and costs by appliance
+- **AI-Powered Insights**: Personalized recommendations based on appliance patterns
+- **Top Consumer Detection**: Identify which appliances use the most energy
+- **Savings Potential**: Calculate optimization opportunities (10-20% savings)
+- **LocalStorage Persistence**: All appliance data saved locally
+
 ### 📊 Main Dashboard
 - **Usage Summary Cards**: Today, This Week, This Month with trend indicators
 - **Interactive Power Timeline Chart**: Hourly/daily consumption with zoom and hover tooltips
