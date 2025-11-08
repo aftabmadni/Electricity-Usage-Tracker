@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UsageSummaryCards } from './UsageSummaryCards';
 import { PowerTimelineChart } from './PowerTimelineChart';
+import { useAppliances } from '../contexts/ApplianceContext';
 import { PredictionChart } from './PredictionChart';
 import { ComparisonChart } from './ComparisonChart';
 import { DeviceBreakdownChart } from './DeviceBreakdownChart';
@@ -9,6 +10,7 @@ import { SavingStreakWidget } from './SavingStreakWidget';
 import { AIInsightsBox } from './AIInsightsBox';
 import { ApplianceManagementSection } from './ApplianceManagementSection';
 import { usageApi, insightsApi } from '../lib/mockApi';
+import { Appliance } from '../lib/applianceTypes';
 import { 
   UsageData, 
   AggregatedUsage, 
@@ -34,15 +36,97 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
 
   // Data state
   const [usageData, setUsageData] = useState<UsageData[]>([]);
-  const [todayUsage, setTodayUsage] = useState<AggregatedUsage | null>(null);
-  const [weekUsage, setWeekUsage] = useState<AggregatedUsage | null>(null);
+  // Removed todayUsage and weekUsage state, now calculated from appliances
   const [monthUsage, setMonthUsage] = useState<AggregatedUsage | null>(null);
   const [previousMonthUsage, setPreviousMonthUsage] = useState<AggregatedUsage | null>(null);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
-  const [devices, setDevices] = useState<DeviceUsage[]>([]);
+  const { appliances } = useAppliances();
   const [carbonFootprint, setCarbonFootprint] = useState<CarbonFootprint | null>(null);
   const [savingStreak, setSavingStreak] = useState<SavingStreak | null>(null);
+  
+  // Utility functions for time calculations
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getDaysSinceCreation = (createdAt: string) => {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diffTime = Math.abs(now.getTime() - created.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+
+  // Helper to aggregate appliance usage for a given period
+  function aggregateApplianceUsage(appliances: Appliance[], period: 'today' | 'week' | 'month'): AggregatedUsage {
+    const costPerKWh = 8;
+    const now = new Date();
+    let days = 1;
+    if (period === 'week') days = 7;
+    if (period === 'month') days = getDaysInMonth(now);
+
+    let totalUnits = 0;
+    appliances.forEach(app => {
+      // Only count usage for days since appliance was added
+      const daysSinceAdded = Math.min(days, getDaysSinceCreation(app.createdAt));
+      const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
+      totalUnits += dailyKWh * daysSinceAdded;
+    });
+    const totalCost = totalUnits * costPerKWh;
+    const avgDaily = days > 0 ? totalUnits / days : 0;
+    return {
+      period,
+      totalUnits: parseFloat(totalUnits.toFixed(2)),
+      totalCost: parseFloat(totalCost.toFixed(2)),
+      avgDaily: parseFloat(avgDaily.toFixed(2)),
+      peakHour: 0,
+      offPeakHour: 0
+    };
+  }
+
+  const todayUsage = React.useMemo(() => aggregateApplianceUsage(appliances, 'today'), [appliances]);
+  const weekUsage = React.useMemo(() => aggregateApplianceUsage(appliances, 'week'), [appliances]);
+  const computedMonthUsage = React.useMemo(() => aggregateApplianceUsage(appliances, 'month'), [appliances]);
+
+  // Device breakdown for charts (month-to-date)
+  const currentDays = React.useMemo(() => {
+    const now = new Date();
+    return now.getDate();
+  }, []);
+  const daysInMonth = getDaysInMonth(new Date());
+  const devices: DeviceUsage[] = React.useMemo(() => {
+    if (appliances.length === 0) return [];
+    const costPerKWh = 8;
+    // Calculate current month-to-date usage
+    const totalUnits = appliances.reduce((sum, app) => {
+      const daysSinceAdded = Math.min(currentDays, getDaysSinceCreation(app.createdAt));
+      const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
+      return sum + (dailyKWh * daysSinceAdded);
+    }, 0);
+    return appliances.map(app => {
+      const daysSinceAdded = Math.min(currentDays, getDaysSinceCreation(app.createdAt));
+      const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
+      const actualUnits = dailyKWh * daysSinceAdded;
+      const projectedUnits = dailyKWh * daysInMonth;
+      const actualCost = actualUnits * costPerKWh;
+      const projectedCost = projectedUnits * costPerKWh;
+      const percentage = totalUnits > 0 ? (actualUnits / totalUnits) * 100 : 0;
+      return {
+        deviceId: app.id,
+        deviceName: app.name,
+        deviceType: app.name as any,
+        percentage,
+        units: actualUnits,
+        projectedUnits,
+        cost: actualCost,
+        projectedCost,
+        dailyKWh,
+        daysActive: daysSinceAdded,
+        color: `hsl(${Math.random() * 360}, 70%, 50%)`
+      };
+    }).sort((a, b) => b.percentage - a.percentage);
+  }, [appliances, currentDays, daysInMonth]);
 
   useEffect(() => {
     loadDashboardData();
@@ -61,7 +145,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
         monthData,
         predictionData,
         insightsData,
-        devicesData,
         carbonData,
         streakData
       ] = await Promise.all([
@@ -71,7 +154,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
         usageApi.getAggregatedUsage('month'),
         insightsApi.getPrediction(),
         insightsApi.getLatestInsights(),
-        insightsApi.getDeviceBreakdown(),
         insightsApi.getCarbonFootprint(),
         insightsApi.getSavingStreak()
       ]);
@@ -86,16 +168,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
         offPeakHour: monthData.offPeakHour
       };
 
-      setUsageData(allUsageData);
-      setTodayUsage(todayData);
-      setWeekUsage(weekData);
-      setMonthUsage(monthData);
-      setPreviousMonthUsage(prevMonth);
-      setPrediction(predictionData);
-      setInsights(insightsData);
-      setDevices(devicesData);
-      setCarbonFootprint(carbonData);
-      setSavingStreak(streakData);
+  setUsageData(allUsageData);
+  setMonthUsage(monthData);
+  setPreviousMonthUsage(prevMonth);
+  setPrediction(predictionData);
+  setInsights(insightsData);
+  setCarbonFootprint(carbonData);
+  setSavingStreak(streakData);
     } catch (err) {
       setError('Failed to load dashboard data. Please try again.');
       console.error('Dashboard load error:', err);
@@ -168,11 +247,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           {/* Usage Summary Cards */}
-          {todayUsage && weekUsage && monthUsage && (
+          {todayUsage && weekUsage && computedMonthUsage && (
             <UsageSummaryCards
               today={todayUsage}
               week={weekUsage}
-              month={monthUsage}
+              month={computedMonthUsage}
               currency={currency}
             />
           )}
@@ -193,10 +272,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
           </div>
 
           {/* Prediction Chart */}
-          {prediction && monthUsage && (
+          {prediction && computedMonthUsage && (
             <PredictionChart
               prediction={prediction}
-              currentMonthUsage={monthUsage.totalUnits}
+              currentMonthUsage={computedMonthUsage.totalUnits}
               currency={currency}
             />
           )}
@@ -204,9 +283,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
           {/* Comparison and Device Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Month Comparison */}
-            {monthUsage && previousMonthUsage && (
+            {computedMonthUsage && previousMonthUsage && (
               <ComparisonChart
-                currentMonth={{ units: monthUsage.totalUnits, cost: monthUsage.totalCost }}
+                currentMonth={{ units: computedMonthUsage.totalUnits, cost: computedMonthUsage.totalCost }}
                 previousMonth={{ units: previousMonthUsage.totalUnits, cost: previousMonthUsage.totalCost }}
                 currency={currency}
               />

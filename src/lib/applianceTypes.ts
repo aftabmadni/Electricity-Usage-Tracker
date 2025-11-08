@@ -99,8 +99,15 @@ export const generateApplianceInsights = (
 
   const highUsageAppliances = appliances.filter(a => a.hoursPerDay > 8);
   if (highUsageAppliances.length > 0) {
+    const applianceNames = highUsageAppliances.map(a => a.name).join(', ');
+    const costPerKWh = 8; // ₹8 per kWh
+    const totalHighUsageCost = highUsageAppliances.reduce((sum, app) => {
+      const usage = calculateApplianceUsage(app, costPerKWh);
+      return sum + usage.monthlyCost;
+    }, 0);
+    
     insights.push(
-      `You have ${highUsageAppliances.length} appliance(s) running more than 8 hours daily. Optimizing their usage can save up to ${summary.potentialSavingsPercent}% on your bill.`
+      `Your ${applianceNames} ${highUsageAppliances.length > 1 ? 'are' : 'is'} running more than 8 hours daily. At ₹8/kWh, optimizing ${highUsageAppliances.length > 1 ? 'their' : 'its'} usage can save up to ${summary.potentialSavingsPercent}% (₹${(totalHighUsageCost * summary.potentialSavingsPercent / 100).toFixed(0)}/month).`
     );
   }
 

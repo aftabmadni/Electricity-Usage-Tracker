@@ -58,9 +58,9 @@ export const ReportsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Header */}
-      <div>
+      <div className="w-full">
         <h1 className="text-3xl font-semibold mb-2">Reports & Exports</h1>
         <p className="text-gray-600">
           Generate detailed reports and export your usage data

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Appliance } from '../lib/applianceTypes';
+import { useAuth } from './AuthContext';
 
 interface ApplianceContextType {
   appliances: Appliance[];
@@ -13,8 +14,8 @@ interface ApplianceContextType {
 
 const ApplianceContext = createContext<ApplianceContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'wattwise_appliances';
-const ONBOARDING_KEY = 'wattwise_onboarding_complete';
+const getStorageKey = (userId: string) => `wattwise_appliances_${userId}`;
+const getOnboardingKey = (userId: string) => `wattwise_onboarding_complete_${userId}`;
 
 export const useAppliances = () => {
   const context = useContext(ApplianceContext);
@@ -25,41 +26,48 @@ export const useAppliances = () => {
 };
 
 export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [appliances, setAppliances] = useState<Appliance[]>([]);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load appliances from localStorage on mount
+  // Load appliances from localStorage on mount or when user changes
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
-      
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setAppliances(parsed);
+    if (user?.id) {
+      try {
+        const stored = localStorage.getItem(getStorageKey(user.id));
+        const onboardingComplete = localStorage.getItem(getOnboardingKey(user.id));
+        
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setAppliances(parsed);
+        } else {
+          setAppliances([]); // Reset appliances for new user
+        }
+        
+        setHasCompletedOnboarding(onboardingComplete === 'true');
+      } catch (error) {
+        console.error('Failed to load appliances from localStorage:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      if (onboardingComplete === 'true') {
-        setHasCompletedOnboarding(true);
-      }
-    } catch (error) {
-      console.error('Failed to load appliances from localStorage:', error);
-    } finally {
+    } else {
+      setAppliances([]);
+      setHasCompletedOnboarding(false);
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   // Save appliances to localStorage whenever they change
   useEffect(() => {
-    if (!loading) {
+    if (!loading && user?.id) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appliances));
+        localStorage.setItem(getStorageKey(user.id), JSON.stringify(appliances));
       } catch (error) {
         console.error('Failed to save appliances to localStorage:', error);
       }
     }
-  }, [appliances, loading]);
+  }, [appliances, loading, user?.id]);
 
   const addAppliance = (applianceData: Omit<Appliance, 'id' | 'createdAt'>) => {
     const newAppliance: Appliance = {
@@ -83,8 +91,10 @@ export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const completeOnboarding = () => {
-    setHasCompletedOnboarding(true);
-    localStorage.setItem(ONBOARDING_KEY, 'true');
+    if (user?.id) {
+      setHasCompletedOnboarding(true);
+      localStorage.setItem(getOnboardingKey(user.id), 'true');
+    }
   };
 
   const value: ApplianceContextType = {

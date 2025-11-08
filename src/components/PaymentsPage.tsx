@@ -153,9 +153,9 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       {/* Header */}
-      <div>
+      <div className="w-full max-w-full">
         <h1 className="text-3xl font-semibold mb-2">Payments</h1>
         <p className="text-gray-600">
           Pay your electricity bills and view payment history
@@ -163,7 +163,7 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
       </div>
 
       {/* Pay Bills Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {/* Actual Bill */}
         <Card className="border-2 border-blue-200">
           <CardHeader>
@@ -171,7 +171,7 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
               <div>
                 <CardTitle>Current Month Bill</CardTitle>
                 <CardDescription>
-                  Based on actual usage this month
+                  Based on actual usage this month • ₹8/kWh
                 </CardDescription>
               </div>
               <Badge>Actual</Badge>
@@ -179,13 +179,14 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Amount Due</p>
+              <p className="text-sm text-gray-600 mb-2">Amount Due (₹8 per unit)</p>
               <p className="text-4xl font-bold text-blue-600">
                 {formatCurrency(currentBill ?? actualBill, currency)}
               </p>
-              <p className="text-sm text-gray-600 mt-2">
-                Due date: Nov 30, 2024
-              </p>
+              <div className="text-sm text-gray-600 mt-2 space-y-1">
+                <p>Due date: Nov 30, 2024</p>
+                <p>Total consumption: {((currentBill ?? actualBill) / 8).toFixed(1)} kWh</p>
+              </div>
             </div>
             <Button 
               onClick={() => handlePayClick(currentBill ?? actualBill, 'actual')}
@@ -205,7 +206,7 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
               <div>
                 <CardTitle>Predicted Next Month</CardTitle>
                 <CardDescription>
-                  AI-powered forecast for advance payment
+                  AI-powered forecast • ₹8/kWh rate
                 </CardDescription>
               </div>
               <Badge variant="secondary">Predicted</Badge>
@@ -213,13 +214,14 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Estimated Amount</p>
+              <p className="text-sm text-gray-600 mb-2">Estimated Amount (₹8 per unit)</p>
               <p className="text-4xl font-bold text-purple-600">
                 {formatCurrency(predictedBill, currency)}
               </p>
-              <p className="text-sm text-gray-600 mt-2">
-                For December 2024
-              </p>
+              <div className="text-sm text-gray-600 mt-2 space-y-1">
+                <p>For December 2024</p>
+                <p>Predicted usage: {(predictedBill / 8).toFixed(1)} kWh</p>
+              </div>
             </div>
             <Button 
               onClick={() => handlePayClick(predictedBill, 'predicted')}
@@ -299,7 +301,7 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
               </p>
             </div>
 
-            <Tabs value={paymentMethod} onValueChange={(v) => handlePaymentMethodChange(v as any)}>
+            <Tabs value={paymentMethod} onValueChange={(v: string) => handlePaymentMethodChange(v as 'razorpay' | 'upi')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="razorpay" className="gap-2">
                   <CreditCard size={16} />

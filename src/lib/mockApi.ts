@@ -33,7 +33,7 @@ const delay = (ms: number = 300) => new Promise(resolve => setTimeout(resolve, m
 let currentUser: User | null = null;
 let usageDataCache: UsageData[] | null = null;
 let authToken: string | null = null;
-let currentMonthBill: number = 3744; // Initialize with appliance-calculated amount
+let currentMonthBill: number = 3280; // Initialize with current month (November 2025) calculated amount
 
 // Authentication API
 export const authApi = {
@@ -320,9 +320,104 @@ export const reportsApi = {
   async exportToPDF(month: string): Promise<Blob> {
     await delay(1000);
     
-    // Mock PDF generation
-    const content = `WattWise Monthly Report - ${month}\n\nThis is a mock PDF. In production, this would be a real PDF file.`;
-    return new Blob([content], { type: 'application/pdf' });
+     const report = await this.generateMonthlyReport(month);
+     const devices = await insightsApi.getDeviceBreakdown();
+    
+     // Create base64-encoded minimal PDF content
+     const pdfContent = `
+  %PDF-1.7
+  1 0 obj
+  << /Type /Catalog
+    /Pages 2 0 R
+  >>
+  endobj
+
+  2 0 obj
+  << /Type /Pages
+    /Kids [3 0 R]
+    /Count 1
+  >>
+  endobj
+
+  3 0 obj
+  << /Type /Page
+    /Parent 2 0 R
+    /Resources << /Font << /F1 4 0 R >> >>
+    /MediaBox [0 0 612 792]
+    /Contents 6 0 R
+  >>
+  endobj
+
+  4 0 obj
+  << /Type /Font
+    /Subtype /Type1
+    /BaseFont /Helvetica
+  >>
+  endobj
+
+  6 0 obj
+  << /Length 1000 >>
+  stream
+  BT
+  /F1 12 Tf
+  36 700 Td
+  (WattWise Monthly Energy Report - ${month}) Tj
+  0 -20 Td
+  (Generated on: ${new Date().toLocaleDateString()}) Tj
+  0 -40 Td
+  (SUMMARY) Tj
+  0 -20 Td
+  (Total Usage: ${report.totalUnits} kWh) Tj
+  0 -15 Td
+  (Total Cost: ₹${report.totalCost}) Tj
+  0 -15 Td
+  (Average Daily Usage: ${report.avgDailyUnits} kWh) Tj
+  0 -15 Td
+  (Peak Day: ${report.peakDay}) Tj
+  0 -15 Td
+  (Savings vs Last Month: ${report.savingsVsLastMonth}%) Tj
+  0 -40 Td
+  (DEVICE BREAKDOWN) Tj
+  ${devices.map((device, i) => `
+  0 -20 Td
+  (${device.deviceName}) Tj
+  0 -15 Td
+  (Usage: ${device.units} kWh (${device.percentage}%)) Tj
+  0 -15 Td
+  (Cost: ₹${device.cost} @ ₹8/kWh) Tj`).join('\n')}
+  0 -40 Td
+  (CARBON FOOTPRINT) Tj
+  0 -20 Td
+  (CO2 Emissions: ${report.carbonFootprint.co2Kg} kg) Tj
+  0 -15 Td
+  (Trees Required: ${report.carbonFootprint.treesEquivalent}) Tj
+  ET
+  endstream
+  endobj
+
+  xref
+  0 7
+  0000000000 65535 f
+  0000000009 00000 n
+  0000000058 00000 n
+  0000000115 00000 n
+  0000000216 00000 n
+  0000000289 00000 n
+  trailer
+  << /Size 6
+    /Root 1 0 R
+  >>
+  startxref
+  1592
+  %%EOF
+  `;
+
+     // Convert string to ArrayBuffer
+     const bytes = new TextEncoder().encode(pdfContent);
+
+     return new Blob([bytes], { 
+      type: 'application/pdf'
+     });
   },
   
   async exportToCSV(range: 'month' | 'year'): Promise<Blob> {

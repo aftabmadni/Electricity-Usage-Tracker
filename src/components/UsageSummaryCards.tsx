@@ -58,12 +58,18 @@ export const UsageSummaryCards: React.FC<UsageSummaryCardsProps> = ({
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">{card.title}</p>
                   <div className="space-y-1">
-                    <p className="text-3xl font-semibold">
-                      {formatUnits(card.units)}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {formatCurrency(card.cost, currency)}
-                    </p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl font-semibold">
+                        {formatUnits(card.units)}
+                      </p>
+                      <span className="text-base text-gray-500">kWh</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-lg text-gray-700">
+                        {formatCurrency(card.cost, currency)}
+                      </p>
+                      <span className="text-base text-gray-500">@ ₹8/kWh</span>
+                    </div>
                   </div>
                   <div className={`flex items-center gap-1 mt-2 text-sm ${
                     isPositive ? 'text-red-600' : 'text-green-600'

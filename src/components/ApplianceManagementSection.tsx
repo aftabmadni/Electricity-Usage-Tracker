@@ -55,7 +55,15 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
   };
 
   const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
+    if (
+      active &&
+      Array.isArray(payload) &&
+      payload.length > 1 &&
+      payload[0] && payload[1] &&
+      payload[0].payload &&
+      typeof payload[0].value !== 'undefined' &&
+      typeof payload[1].value !== 'undefined'
+    ) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
           <p className="font-medium text-sm mb-1">{payload[0].payload.name}</p>

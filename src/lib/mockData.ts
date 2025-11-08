@@ -85,8 +85,8 @@ export const generateAIInsights = (): AIInsight[] => {
     {
       id: 'insight-1',
       type: 'warning',
-      title: 'AC Usage Spike Detected',
-      message: 'Your AC usage increased by 18% between 6-9 PM compared to last week. Setting temperature to 25°C instead of 23°C could save ₹450/month.',
+      title: 'Daikin AC (Living Room) Usage Spike',
+      message: 'Your Daikin AC in the living room is running 18% more between 6-9 PM compared to last week. Setting temperature to 25°C instead of 23°C could save ₹450/month.',
       priority: 'high',
       actionable: true,
       action: 'Adjust AC settings',
@@ -96,8 +96,8 @@ export const generateAIInsights = (): AIInsight[] => {
     {
       id: 'insight-2',
       type: 'tip',
-      title: 'Peak Hour Optimization',
-      message: 'You consume 65% of electricity during peak hours (6-10 PM). Shifting washing machine and dishwasher to off-peak hours could save ₹320/month.',
+      title: 'Washing Machine Usage Timing',
+      message: 'Your Samsung washing machine runs mostly during peak hours (6-10 PM) when rates are highest. Shifting to off-peak hours (10 AM-4 PM) could save ₹320/month.',
       priority: 'medium',
       actionable: true,
       action: 'View schedule suggestions',
@@ -128,8 +128,8 @@ export const generateAIInsights = (): AIInsight[] => {
     {
       id: 'insight-5',
       type: 'tip',
-      title: 'Refrigerator Efficiency',
-      message: 'Your refrigerator consumes 15% more than optimal. Check door seals and defrost if needed. Could save ₹180/month.',
+      title: 'Long Running Appliance Alert',
+      message: 'Your Refrigerator is running for more than 8 hours daily (continuous operation). While refrigerators need to run continuously, its power consumption is 15% above optimal. At ₹8/kWh, optimizing temperature settings and checking door seals could save ₹180/month.',
       priority: 'medium',
       actionable: true,
       action: 'Learn more',

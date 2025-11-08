@@ -70,6 +70,11 @@ export interface DeviceUsage {
   units: number;
   cost: number;
   color: string;
+  // Optional fields for projections and details
+  projectedUnits?: number;
+  projectedCost?: number;
+  dailyKWh?: number;
+  daysActive?: number;
 }
 
 export interface PaymentOrder {

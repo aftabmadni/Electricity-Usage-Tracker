@@ -20,18 +20,32 @@ export const DeviceBreakdownChart: React.FC<DeviceBreakdownChartProps> = ({
     if (active && payload && payload.length) {
       const device = payload[0].payload;
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200 min-w-[250px]">
           <p className="font-medium text-sm mb-2">{device.deviceName}</p>
           <div className="space-y-1">
-            <p className="text-sm">
-              <span className="text-gray-600">Usage: </span>
-              <span className="font-medium">{formatUnits(device.units)}</span>
-            </p>
-            <p className="text-sm">
-              <span className="text-gray-600">Cost: </span>
-              <span className="font-medium">{formatCurrency(device.cost, currency)}</span>
-            </p>
-            <p className="text-sm">
+            <div className="flex flex-col gap-1 border-b pb-1">
+              <p className="text-sm font-medium">Current ({device.daysActive} days)</p>
+              <p className="text-sm">
+                <span className="text-gray-600">Usage: </span>
+                <span className="font-medium">{formatUnits(device.units)}</span>
+              </p>
+              <p className="text-sm">
+                <span className="text-gray-600">Cost: </span>
+                <span className="font-medium">{formatCurrency(device.cost, currency)}</span>
+              </p>
+            </div>
+            <div className="flex flex-col gap-1 pt-1">
+              <p className="text-sm font-medium">Projected (30 days)</p>
+              <p className="text-sm">
+                <span className="text-gray-600">Usage: </span>
+                <span className="font-medium">{formatUnits(device.projectedUnits)}</span>
+              </p>
+              <p className="text-sm">
+                <span className="text-gray-600">Cost: </span>
+                <span className="font-medium">{formatCurrency(device.projectedCost, currency)}</span>
+              </p>
+            </div>
+            <p className="text-sm pt-1 border-t">
               <span className="text-gray-600">Share: </span>
               <span className="font-medium">{formatPercentage(device.percentage)}</span>
             </p>
@@ -51,7 +65,7 @@ export const DeviceBreakdownChart: React.FC<DeviceBreakdownChartProps> = ({
       <CardHeader>
         <CardTitle>Device-Level Breakdown</CardTitle>
         <CardDescription>
-          Simulated appliance usage distribution
+          Device-wise usage and cost (₹8/kWh)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -112,7 +126,7 @@ export const DeviceBreakdownChart: React.FC<DeviceBreakdownChartProps> = ({
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{device.deviceName}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {formatUnits(device.units)} • {formatCurrency(device.cost, currency)}
+                        {formatUnits(device.units)} • {formatCurrency(device.cost, currency)} (₹8/kWh)
                       </p>
                     </div>
                   </div>

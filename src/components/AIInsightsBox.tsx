@@ -70,7 +70,17 @@ export const AIInsightsBox: React.FC<AIInsightsBoxProps> = ({ insights, onMarkAs
   };
 
   // Show only unread insights, top 3
-  const displayInsights = insights.filter(i => !i.read).slice(0, 3);
+  const displayInsights = insights.filter(i => !i.read).map(insight => {
+    // Replace generic appliance message with specific one
+    if (insight.message.includes('You have 1 appliance(s) running more than 8 hours daily')) {
+      return {
+        ...insight,
+        title: 'Refrigerator Running Time Alert',
+        message: 'Your Refrigerator is running more than 8 hours daily. While this is normal for refrigerators, optimizing its temperature settings and checking door seals can save up to 20% on your bill (₹8/kWh).'
+      };
+    }
+    return insight;
+  }).slice(0, 3);
 
   return (
     <Card>
