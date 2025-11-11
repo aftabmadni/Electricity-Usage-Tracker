@@ -98,7 +98,7 @@ export const AIInsightsBox: React.FC<AIInsightsBoxProps> = ({
       ) {
         return {
           ...insight,
-          action: "View washing machine schedule suggestions",
+          action: "washing machine schedule suggestions",
         };
       }
       return insight;

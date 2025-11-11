@@ -338,9 +338,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
                     bottom: 32,
                   }}
                 >
-                  <span className="inline-block px-4 py-2 bg-indigo-600 text-black rounded-full shadow-md text-base font-semibold motion-safe:animate-pulse">
-                    Empower your home, save energy!
-                  </span>
+                 
                 </div>
               </div>
             </div>
