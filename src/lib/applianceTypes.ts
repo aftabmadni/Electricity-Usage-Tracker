@@ -31,9 +31,12 @@ export const calculateApplianceUsage = (
   costPerKWh: number = 8
 ): ApplianceUsageCalculation => {
   // Monthly kWh = (Watts / 1000) * Hours/Day * Days/Month
-  const monthlyKWh = (appliance.powerWatts / 1000) * appliance.hoursPerDay * appliance.daysPerMonth;
+  const monthlyKWh =
+    (appliance.powerWatts / 1000) *
+    appliance.hoursPerDay *
+    appliance.daysPerMonth;
   const monthlyCost = monthlyKWh * costPerKWh;
-  
+
   const dailyKWh = (appliance.powerWatts / 1000) * appliance.hoursPerDay;
   const dailyCost = dailyKWh * costPerKWh;
 
@@ -42,7 +45,7 @@ export const calculateApplianceUsage = (
     monthlyKWh: parseFloat(monthlyKWh.toFixed(2)),
     monthlyCost: parseFloat(monthlyCost.toFixed(2)),
     dailyKWh: parseFloat(dailyKWh.toFixed(2)),
-    dailyCost: parseFloat(dailyCost.toFixed(2))
+    dailyCost: parseFloat(dailyCost.toFixed(2)),
   };
 };
 
@@ -57,30 +60,40 @@ export const calculateApplianceSummary = (
       totalMonthlyCost: 0,
       totalAppliances: 0,
       topConsumer: null,
-      potentialSavingsPercent: 0
+      potentialSavingsPercent: 0,
     };
   }
 
-  const calculations = appliances.map(a => calculateApplianceUsage(a, costPerKWh));
-  
-  const totalMonthlyKWh = calculations.reduce((sum, calc) => sum + calc.monthlyKWh, 0);
-  const totalMonthlyCost = calculations.reduce((sum, calc) => sum + calc.monthlyCost, 0);
-  
+  const calculations = appliances.map((a) =>
+    calculateApplianceUsage(a, costPerKWh)
+  );
+
+  const totalMonthlyKWh = calculations.reduce(
+    (sum, calc) => sum + calc.monthlyKWh,
+    0
+  );
+  const totalMonthlyCost = calculations.reduce(
+    (sum, calc) => sum + calc.monthlyCost,
+    0
+  );
+
   // Find top consumer
-  const topConsumer = calculations.reduce((max, calc) => 
+  const topConsumer = calculations.reduce((max, calc) =>
     calc.monthlyKWh > (max?.monthlyKWh || 0) ? calc : max
   );
 
   // Calculate potential savings (simple heuristic: 10-20% based on usage patterns)
-  const avgHoursPerDay = appliances.reduce((sum, a) => sum + a.hoursPerDay, 0) / appliances.length;
-  const potentialSavingsPercent = avgHoursPerDay > 10 ? 20 : avgHoursPerDay > 6 ? 15 : 10;
+  const avgHoursPerDay =
+    appliances.reduce((sum, a) => sum + a.hoursPerDay, 0) / appliances.length;
+  const potentialSavingsPercent =
+    avgHoursPerDay > 10 ? 20 : avgHoursPerDay > 6 ? 15 : 10;
 
   return {
     totalMonthlyKWh: parseFloat(totalMonthlyKWh.toFixed(2)),
     totalMonthlyCost: parseFloat(totalMonthlyCost.toFixed(2)),
     totalAppliances: appliances.length,
     topConsumer,
-    potentialSavingsPercent
+    potentialSavingsPercent,
   };
 };
 
@@ -93,21 +106,32 @@ export const generateApplianceInsights = (
 
   if (summary.topConsumer) {
     insights.push(
-      `Your ${summary.topConsumer.appliance.name} consumes the most energy at ${summary.topConsumer.monthlyKWh} kWh/month. Consider reducing usage by 1-2 hours daily to save ₹${(summary.topConsumer.monthlyCost * 0.15).toFixed(0)}/month.`
+      `Your ${summary.topConsumer.appliance.name} consumes the most energy at ${
+        summary.topConsumer.monthlyKWh
+      } kWh/month. Consider reducing usage by 1-2 hours daily to save ₹${(
+        summary.topConsumer.monthlyCost * 0.15
+      ).toFixed(0)}/month.`
     );
   }
 
-  const highUsageAppliances = appliances.filter(a => a.hoursPerDay > 8);
+  const highUsageAppliances = appliances.filter((a) => a.hoursPerDay > 8);
   if (highUsageAppliances.length > 0) {
-    const applianceNames = highUsageAppliances.map(a => a.name).join(', ');
+    const applianceNames = highUsageAppliances.map((a) => a.name).join(", ");
     const costPerKWh = 8; // ₹8 per kWh
     const totalHighUsageCost = highUsageAppliances.reduce((sum, app) => {
       const usage = calculateApplianceUsage(app, costPerKWh);
       return sum + usage.monthlyCost;
     }, 0);
-    
+
     insights.push(
-      `Your ${applianceNames} ${highUsageAppliances.length > 1 ? 'are' : 'is'} running more than 8 hours daily. At ₹8/kWh, optimizing ${highUsageAppliances.length > 1 ? 'their' : 'its'} usage can save up to ${summary.potentialSavingsPercent}% (₹${(totalHighUsageCost * summary.potentialSavingsPercent / 100).toFixed(0)}/month).`
+      `Your ${applianceNames} ${
+        highUsageAppliances.length > 1 ? "are" : "is"
+      } running more than 8 hours daily. At ₹8/kWh, optimizing ${
+        highUsageAppliances.length > 1 ? "their" : "its"
+      } usage can save up to ${summary.potentialSavingsPercent}% (₹${(
+        (totalHighUsageCost * summary.potentialSavingsPercent) /
+        100
+      ).toFixed(0)}/month).`
     );
   }
 

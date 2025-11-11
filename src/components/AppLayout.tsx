@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
-import { 
-  Home, 
-  BarChart3, 
-  CreditCard, 
-  Settings, 
+import React, { useState } from "react";
+import {
+  Home,
+  BarChart3,
+  CreditCard,
+  Settings,
   Menu,
   X,
   Bell,
   LogOut,
   User,
-  Zap
-} from 'lucide-react';
+  Zap,
+} from "lucide-react";
 
 import {
   SidebarProvider,
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarTrigger
-} from './ui/sidebar';
-import { UsageSummarySidebar } from './UsageSummarySidebar';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from './ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+  SidebarTrigger,
+} from "./ui/sidebar";
+import { UsageSummarySidebar } from "./UsageSummarySidebar";
+import { useAuth } from "../contexts/AuthContext";
+import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,32 +30,32 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Badge } from './ui/badge';
+} from "./ui/dropdown-menu";
+import { Badge } from "./ui/badge";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  currentPage: 'dashboard' | 'reports' | 'payments' | 'settings';
-  onNavigate: (page: 'dashboard' | 'reports' | 'payments' | 'settings') => void;
+  currentPage: "dashboard" | "reports" | "payments" | "settings";
+  onNavigate: (page: "dashboard" | "reports" | "payments" | "settings") => void;
   notificationCount?: number;
   onNotificationClick?: () => void;
 }
 
-export const AppLayout: React.FC<AppLayoutProps> = ({ 
-  children, 
+export const AppLayout: React.FC<AppLayoutProps> = ({
+  children,
   currentPage,
   onNavigate,
   notificationCount = 0,
-  onNotificationClick
+  onNotificationClick,
 }) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { id: 'dashboard' as const, name: 'Dashboard', icon: Home },
-    { id: 'reports' as const, name: 'Reports', icon: BarChart3 },
-    { id: 'payments' as const, name: 'Payments', icon: CreditCard },
-    { id: 'settings' as const, name: 'Settings', icon: Settings },
+    { id: "dashboard" as const, name: "Dashboard", icon: Home },
+    { id: "reports" as const, name: "Reports", icon: BarChart3 },
+    { id: "payments" as const, name: "Payments", icon: CreditCard },
+    { id: "settings" as const, name: "Settings", icon: Settings },
   ];
 
   const handleLogout = async () => {
@@ -96,8 +96,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       onClick={() => onNavigate(item.id)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                         isActive
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <Icon size={20} />
@@ -118,8 +118,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 >
                   <Bell size={20} />
                   {notificationCount > 0 && (
-                    <Badge 
-                      variant="destructive" 
+                    <Badge
+                      variant="destructive"
                       className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                     >
                       {notificationCount}
@@ -132,7 +132,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user?.avatar} alt={user?.name} />
-                        <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                        <AvatarFallback>
+                          {user?.name?.charAt(0) || "U"}
+                        </AvatarFallback>
                       </Avatar>
                       <span className="text-sm">{user?.name}</span>
                     </button>
@@ -141,20 +143,25 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     <DropdownMenuLabel>
                       <div className="flex flex-col">
                         <span>{user?.name}</span>
-                        <span className="text-xs text-gray-500">{user?.email}</span>
+                        <span className="text-xs text-gray-500">
+                          {user?.email}
+                        </span>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onNavigate('settings')}>
+                    <DropdownMenuItem onClick={() => onNavigate("settings")}>
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onNavigate('settings')}>
+                    <DropdownMenuItem onClick={() => onNavigate("settings")}>
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-600"
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
                     </DropdownMenuItem>
@@ -178,9 +185,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   <span>© 2024 WattWise. All rights reserved.</span>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <button className="hover:text-blue-600 transition-colors">Privacy Policy</button>
-                  <button className="hover:text-blue-600 transition-colors">Terms of Service</button>
-                  <button className="hover:text-blue-600 transition-colors">Contact</button>
+                  <button className="hover:text-blue-600 transition-colors">
+                    Privacy Policy
+                  </button>
+                  <button className="hover:text-blue-600 transition-colors">
+                    Terms of Service
+                  </button>
+                  <button className="hover:text-blue-600 transition-colors">
+                    Contact
+                  </button>
                 </div>
               </div>
             </div>

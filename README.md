@@ -1,39 +1,46 @@
 # ⚡ WattWise – AI-Powered Electricity Tracker
 
-  # WattWise Electricity Tracker App
+# WattWise Electricity Tracker App
+
 WattWise is an intelligent web application that helps users **track, analyze, and optimize electricity consumption — without needing hardware integration**.  
 It offers **AI-based consumption forecasting**, **smart bill-saving suggestions**, and an **interactive dashboard with bill payment support**.
 
-  
 ---
 
-  ## Running the code
+## Running the code
+
 ## 🚀 Features
 
-  Run `npm i` to install the dependencies.
+Run `npm i` to install the dependencies.
+
 ### 🔹 Smart Electricity Usage Tracking
+
 - Enter or import usage data manually
 - Real-time visualization with dynamic charts
 - Daily, weekly, & monthly usage reports
 
   Run `npm run dev` to start the development server.
-  
+
 ### 🤖 AI Integration
+
 - Predicts next month’s consumption & bill
 - Detects unusual usage spikes
 - Provides AI-generated tips to reduce wastage
 
 ### 💸 Smart Bill Payment
+
 - Real-time bill display based on usage
 - UPI / Stripe-based payment
 - Payment success alerts
 
 ### 📊 Interactive Dashboard
+
 - AI-generated trend graphs
 - Compare usage with previous months / similar homes
 - Environmental CO₂ impact report
 
 ### 📬 Notifications & Alerts
+
 - Bill-due reminders
 - Alerts on excess consumption
 - AI insights via email / in-app
@@ -42,23 +49,24 @@ It offers **AI-based consumption forecasting**, **smart bill-saving suggestions*
 
 ## 🏗️ Tech Stack
 
-| Layer | Tools |
-|-------|-------|
-| **Frontend** | React + TypeScript + Vite |
-| **UI / Styling** | Tailwind CSS / ShadCN UI |
-| **State Mgmt** | Context API / Redux Toolkit |
-| **Charts** | Recharts / Chart.js |
-| **AI Integration** | OpenAI API / TensorFlow.js |
-| **Optional Backend** | Node.js / Express / Flask |
+| Layer                   | Tools                         |
+| ----------------------- | ----------------------------- |
+| **Frontend**            | React + TypeScript + Vite     |
+| **UI / Styling**        | Tailwind CSS / ShadCN UI      |
+| **State Mgmt**          | Context API / Redux Toolkit   |
+| **Charts**              | Recharts / Chart.js           |
+| **AI Integration**      | OpenAI API / TensorFlow.js    |
+| **Optional Backend**    | Node.js / Express / Flask     |
 | **Database (Optional)** | MongoDB / Firebase / Supabase |
-| **Payments** | Razorpay / Stripe |
-| **Hosting** | Vercel / Netlify / Render |
+| **Payments**            | Razorpay / Stripe             |
+| **Hosting**             | Vercel / Netlify / Render     |
 
 ---
 
 ## ⚙️ Installation & Setup
 
-1️⃣ Clone the repository  
+1️⃣ Clone the repository
+
 ```bash
 git clone https://github.com/aftabmadni/aiml-wattwise-tracker.git
 cd wattwise-electricity-tracker
@@ -119,4 +127,5 @@ src/
 ✅ Carbon footprint calculator
 ✅ Gamified “Energy-Saving Score”
 ✅ AI chatbot for usage recommendations & support
-  
+
+```

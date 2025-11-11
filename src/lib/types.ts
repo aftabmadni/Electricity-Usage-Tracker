@@ -1,44 +1,45 @@
-// Core TypeScript types for WattWise application
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  createdAt: string;
-  preferences: UserPreferences;
-}
-
-export interface UserPreferences {
-  currency: 'INR' | 'USD' | 'EUR';
-  units: 'kWh' | 'MWh';
-  monthlyBudget: number;
-  notifications: {
-    email: boolean;
-    push: boolean;
-    aiInsights: boolean;
-  };
-  language: 'en' | 'hi';
-}
-
 export interface UsageData {
   timestamp: string;
-  unitsConsumed: number; // kWh
-  deviceId?: string;
+  unitsConsumed: number;
+  deviceId: string;
   temperature?: number;
   regionCode?: string;
   cost?: number;
 }
 
 export interface AggregatedUsage {
-  period: 'today' | 'week' | 'month' | 'year';
+  period: "today" | "week" | "month" | "year";
   totalUnits: number;
   totalCost: number;
   avgDaily: number;
   peakHour: number;
   offPeakHour: number;
 }
+// Core TypeScript types for WattWise application
 
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  password?: string;
+  avatar?: string;
+  createdAt: string;
+  preferences: UserPreferences;
+}
+
+export interface UserPreferences {
+  currency: "INR" | "USD" | "EUR";
+  units: "kWh" | "MWh";
+  monthlyBudget: number;
+  notifications: {
+    email: boolean;
+    push: boolean;
+    aiInsights: boolean;
+  };
+  language: "en" | "hi";
+}
+
+// Removed duplicate User interface
 export interface Prediction {
   predictedUnits: number;
   predictedCost: number;
@@ -52,10 +53,10 @@ export interface Prediction {
 
 export interface AIInsight {
   id: string;
-  type: 'warning' | 'tip' | 'achievement' | 'anomaly';
+  type: "warning" | "tip" | "achievement" | "anomaly";
   title: string;
   message: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   actionable: boolean;
   action?: string;
   createdAt: string;
@@ -65,7 +66,14 @@ export interface AIInsight {
 export interface DeviceUsage {
   deviceId: string;
   deviceName: string;
-  deviceType: 'AC' | 'Refrigerator' | 'Water Heater' | 'Lights' | 'TV' | 'Washing Machine' | 'Other';
+  deviceType:
+    | "AC"
+    | "Refrigerator"
+    | "Water Heater"
+    | "Lights"
+    | "TV"
+    | "Washing Machine"
+    | "Other";
   percentage: number;
   units: number;
   cost: number;
@@ -81,7 +89,7 @@ export interface PaymentOrder {
   id: string;
   amount: number;
   currency: string;
-  status: 'created' | 'authorized' | 'captured' | 'failed';
+  status: "created" | "authorized" | "captured" | "failed";
   createdAt: string;
   razorpayOrderId?: string;
   currentMonthBill?: number; // Added to sync UI with current bill
@@ -92,8 +100,8 @@ export interface PaymentHistory {
   orderId: string;
   amount: number;
   currency: string;
-  status: 'success' | 'failed' | 'pending';
-  method: 'razorpay' | 'upi' | 'card';
+  status: "success" | "failed" | "pending";
+  method: "razorpay" | "upi" | "card";
   transactionId?: string;
   billMonth: string;
   paidAt: string;
@@ -116,7 +124,7 @@ export interface SavingStreak {
 
 export interface Notification {
   id: string;
-  type: 'payment' | 'insight' | 'alert' | 'achievement';
+  type: "payment" | "insight" | "alert" | "achievement";
   title: string;
   message: string;
   read: boolean;

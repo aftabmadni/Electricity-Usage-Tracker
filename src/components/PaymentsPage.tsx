@@ -1,56 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { 
-  CreditCard, 
-  Smartphone, 
-  CheckCircle, 
-  Clock, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import {
+  CreditCard,
+  Smartphone,
+  CheckCircle,
+  Clock,
   XCircle,
   Download,
   QrCode,
-  ExternalLink
-} from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import { Badge } from './ui/badge';
-import { paymentsApi } from '../lib/mockApi';
-import { PaymentHistory } from '../lib/types';
-import { formatCurrency, formatDate } from '../lib/formatters';
-import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+  ExternalLink,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Badge } from "./ui/badge";
+import { paymentsApi } from "../lib/mockApi";
+import { PaymentHistory } from "../lib/types";
+import { formatCurrency, formatDate } from "../lib/formatters";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface PaymentsPageProps {
   predictedBill: number;
   actualBill: number;
-  currency: 'INR' | 'USD' | 'EUR';
+  currency: "INR" | "USD" | "EUR";
 }
 
 export const PaymentsPage: React.FC<PaymentsPageProps> = ({
   predictedBill,
   actualBill,
-  currency
+  currency,
 }) => {
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'upi'>('razorpay');
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "upi">(
+    "razorpay"
+  );
   const [paymentAmount, setPaymentAmount] = useState(0);
-  const [paymentType, setPaymentType] = useState<'predicted' | 'actual'>('actual');
-  const [upiLink, setUpiLink] = useState('');
-  const [qrCode, setQrCode] = useState('');
+  const [paymentType, setPaymentType] = useState<"predicted" | "actual">(
+    "actual"
+  );
+  const [upiLink, setUpiLink] = useState("");
+  const [qrCode, setQrCode] = useState("");
 
   const [currentBill, setCurrentBill] = useState<number | null>(null);
 
   useEffect(() => {
     loadPaymentHistory();
-    
+
     // Load current month bill from canonical source
     const loadCurrentBill = async () => {
       try {
         const amount = await paymentsApi.getCurrentMonthBill();
         setCurrentBill(amount);
       } catch (err) {
-        console.error('Failed to load current bill:', err);
+        console.error("Failed to load current bill:", err);
       }
     };
 
@@ -67,11 +83,11 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
       const history = await paymentsApi.getPaymentHistory();
       setPaymentHistory(history);
     } catch (error) {
-      toast.error('Failed to load payment history');
+      toast.error("Failed to load payment history");
     }
   };
 
-  const handlePayClick = (amount: number, type: 'predicted' | 'actual') => {
+  const handlePayClick = (amount: number, type: "predicted" | "actual") => {
     setPaymentAmount(amount);
     setPaymentType(type);
     setShowPaymentDialog(true);
@@ -85,23 +101,26 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
 
       // In production, this would open Razorpay checkout
       // For demo, we'll simulate success after a delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Simulate payment verification
       await paymentsApi.verifyPayment(
         order.id,
-        'pay_mock_' + Date.now(),
-        'sig_mock_' + Date.now()
+        "pay_mock_" + Date.now(),
+        "sig_mock_" + Date.now()
       );
 
-      toast.success('Payment successful!', {
-        description: `Your bill of ${formatCurrency(paymentAmount, currency)} has been paid.`
+      toast.success("Payment successful!", {
+        description: `Your bill of ${formatCurrency(
+          paymentAmount,
+          currency
+        )} has been paid.`,
       });
 
       setShowPaymentDialog(false);
       loadPaymentHistory();
     } catch (error) {
-      toast.error('Payment failed. Please try again.');
+      toast.error("Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -110,29 +129,31 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
   const processUPIPayment = async () => {
     setLoading(true);
     try {
-      const { upiLink: link, qrCode: qr } = await paymentsApi.generateUPILink(paymentAmount);
+      const { upiLink: link, qrCode: qr } = await paymentsApi.generateUPILink(
+        paymentAmount
+      );
       setUpiLink(link);
       setQrCode(qr);
       setLoading(false);
     } catch (error) {
-      toast.error('Failed to generate UPI link');
+      toast.error("Failed to generate UPI link");
       setLoading(false);
     }
   };
 
-  const handlePaymentMethodChange = (method: 'razorpay' | 'upi') => {
+  const handlePaymentMethodChange = (method: "razorpay" | "upi") => {
     setPaymentMethod(method);
-    setUpiLink('');
-    setQrCode('');
+    setUpiLink("");
+    setQrCode("");
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success':
+      case "success":
         return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'pending':
+      case "pending":
         return <Clock className="w-4 h-4 text-yellow-600" />;
-      case 'failed':
+      case "failed":
         return <XCircle className="w-4 h-4 text-red-600" />;
       default:
         return null;
@@ -141,11 +162,11 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'success':
+      case "success":
         return <Badge className="bg-green-100 text-green-700">Success</Badge>;
-      case 'pending':
+      case "pending":
         return <Badge className="bg-yellow-100 text-yellow-700">Pending</Badge>;
-      case 'failed':
+      case "failed":
         return <Badge variant="destructive">Failed</Badge>;
       default:
         return null;
@@ -179,17 +200,24 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Amount Due (₹8 per unit)</p>
+              <p className="text-sm text-gray-600 mb-2">
+                Amount Due (₹8 per unit)
+              </p>
               <p className="text-4xl font-bold text-blue-600">
                 {formatCurrency(currentBill ?? actualBill, currency)}
               </p>
               <div className="text-sm text-gray-600 mt-2 space-y-1">
                 <p>Due date: Nov 30, 2024</p>
-                <p>Total consumption: {((currentBill ?? actualBill) / 8).toFixed(1)} kWh</p>
+                <p>
+                  Total consumption:{" "}
+                  {((currentBill ?? actualBill) / 8).toFixed(1)} kWh
+                </p>
               </div>
             </div>
-            <Button 
-              onClick={() => handlePayClick(currentBill ?? actualBill, 'actual')}
+            <Button
+              onClick={() =>
+                handlePayClick(currentBill ?? actualBill, "actual")
+              }
               className="w-full gap-2"
               size="lg"
             >
@@ -214,7 +242,9 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Estimated Amount (₹8 per unit)</p>
+              <p className="text-sm text-gray-600 mb-2">
+                Estimated Amount (₹8 per unit)
+              </p>
               <p className="text-4xl font-bold text-purple-600">
                 {formatCurrency(predictedBill, currency)}
               </p>
@@ -223,8 +253,8 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
                 <p>Predicted usage: {(predictedBill / 8).toFixed(1)} kWh</p>
               </div>
             </div>
-            <Button 
-              onClick={() => handlePayClick(predictedBill, 'predicted')}
+            <Button
+              onClick={() => handlePayClick(predictedBill, "predicted")}
               variant="outline"
               className="w-full gap-2"
               size="lg"
@@ -240,9 +270,7 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
       <Card>
         <CardHeader>
           <CardTitle>Payment History</CardTitle>
-          <CardDescription>
-            View all your past transactions
-          </CardDescription>
+          <CardDescription>View all your past transactions</CardDescription>
         </CardHeader>
         <CardContent>
           {paymentHistory.length === 0 ? (
@@ -261,7 +289,8 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
                     <div>
                       <p className="font-medium text-sm">{payment.billMonth}</p>
                       <p className="text-xs text-gray-500">
-                        {formatDate(payment.paidAt)} • {payment.method.toUpperCase()}
+                        {formatDate(payment.paidAt)} •{" "}
+                        {payment.method.toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -289,7 +318,8 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
           <DialogHeader>
             <DialogTitle>Complete Payment</DialogTitle>
             <DialogDescription>
-              Pay your {paymentType === 'actual' ? 'current' : 'predicted'} bill securely
+              Pay your {paymentType === "actual" ? "current" : "predicted"} bill
+              securely
             </DialogDescription>
           </DialogHeader>
 
@@ -301,7 +331,12 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
               </p>
             </div>
 
-            <Tabs value={paymentMethod} onValueChange={(v: string) => handlePaymentMethodChange(v as 'razorpay' | 'upi')}>
+            <Tabs
+              value={paymentMethod}
+              onValueChange={(v: string) =>
+                handlePaymentMethodChange(v as "razorpay" | "upi")
+              }
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="razorpay" className="gap-2">
                   <CreditCard size={16} />
@@ -315,16 +350,17 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
 
               <TabsContent value="razorpay" className="space-y-4 mt-4">
                 <p className="text-sm text-gray-600">
-                  Pay securely using Razorpay with Credit/Debit Card, Net Banking, or UPI
+                  Pay securely using Razorpay with Credit/Debit Card, Net
+                  Banking, or UPI
                 </p>
-                <Button 
-                  onClick={processRazorpayPayment} 
+                <Button
+                  onClick={processRazorpayPayment}
                   disabled={loading}
                   className="w-full gap-2"
                   size="lg"
                 >
                   <CreditCard size={18} />
-                  {loading ? 'Processing...' : 'Pay with Razorpay'}
+                  {loading ? "Processing..." : "Pay with Razorpay"}
                 </Button>
                 <p className="text-xs text-center text-gray-500">
                   You will be redirected to Razorpay's secure payment gateway
@@ -337,22 +373,26 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
                     <p className="text-sm text-gray-600">
                       Generate a UPI payment link to pay using any UPI app
                     </p>
-                    <Button 
-                      onClick={processUPIPayment} 
+                    <Button
+                      onClick={processUPIPayment}
                       disabled={loading}
                       variant="outline"
                       className="w-full gap-2"
                       size="lg"
                     >
                       <QrCode size={18} />
-                      {loading ? 'Generating...' : 'Generate UPI Link'}
+                      {loading ? "Generating..." : "Generate UPI Link"}
                     </Button>
                   </>
                 ) : (
                   <>
                     <div className="text-center">
                       <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
-                        <img src={qrCode} alt="UPI QR Code" className="w-48 h-48" />
+                        <img
+                          src={qrCode}
+                          alt="UPI QR Code"
+                          className="w-48 h-48"
+                        />
                       </div>
                       <p className="text-sm text-gray-600 mt-3">
                         Scan QR code with any UPI app
@@ -366,8 +406,8 @@ export const PaymentsPage: React.FC<PaymentsPageProps> = ({
                         <span className="bg-white px-2 text-gray-500">Or</span>
                       </div>
                     </div>
-                    <Button 
-                      onClick={() => window.open(upiLink, '_blank')}
+                    <Button
+                      onClick={() => window.open(upiLink, "_blank")}
                       variant="outline"
                       className="w-full gap-2"
                     >

@@ -1,31 +1,39 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Appliance } from '../lib/applianceTypes';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Appliance } from "../lib/applianceTypes";
+import { useAuth } from "./AuthContext";
 
 interface ApplianceContextType {
   appliances: Appliance[];
-  addAppliance: (appliance: Omit<Appliance, 'id' | 'createdAt'>) => void;
-  updateAppliance: (id: string, appliance: Omit<Appliance, 'id' | 'createdAt'>) => void;
+  addAppliance: (appliance: Omit<Appliance, "id" | "createdAt">) => void;
+  updateAppliance: (
+    id: string,
+    appliance: Omit<Appliance, "id" | "createdAt">
+  ) => void;
   deleteAppliance: (id: string) => void;
   hasCompletedOnboarding: boolean;
   completeOnboarding: () => void;
   loading: boolean;
 }
 
-const ApplianceContext = createContext<ApplianceContextType | undefined>(undefined);
+const ApplianceContext = createContext<ApplianceContextType | undefined>(
+  undefined
+);
 
 const getStorageKey = (userId: string) => `wattwise_appliances_${userId}`;
-const getOnboardingKey = (userId: string) => `wattwise_onboarding_complete_${userId}`;
+const getOnboardingKey = (userId: string) =>
+  `wattwise_onboarding_complete_${userId}`;
 
 export const useAppliances = () => {
   const context = useContext(ApplianceContext);
   if (!context) {
-    throw new Error('useAppliances must be used within ApplianceProvider');
+    throw new Error("useAppliances must be used within ApplianceProvider");
   }
   return context;
 };
 
-export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { user } = useAuth();
   const [appliances, setAppliances] = useState<Appliance[]>([]);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
@@ -36,18 +44,20 @@ export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (user?.id) {
       try {
         const stored = localStorage.getItem(getStorageKey(user.id));
-        const onboardingComplete = localStorage.getItem(getOnboardingKey(user.id));
-        
+        const onboardingComplete = localStorage.getItem(
+          getOnboardingKey(user.id)
+        );
+
         if (stored) {
           const parsed = JSON.parse(stored);
           setAppliances(parsed);
         } else {
           setAppliances([]); // Reset appliances for new user
         }
-        
-        setHasCompletedOnboarding(onboardingComplete === 'true');
+
+        setHasCompletedOnboarding(onboardingComplete === "true");
       } catch (error) {
-        console.error('Failed to load appliances from localStorage:', error);
+        console.error("Failed to load appliances from localStorage:", error);
       } finally {
         setLoading(false);
       }
@@ -62,38 +72,44 @@ export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     if (!loading && user?.id) {
       try {
-        localStorage.setItem(getStorageKey(user.id), JSON.stringify(appliances));
+        localStorage.setItem(
+          getStorageKey(user.id),
+          JSON.stringify(appliances)
+        );
       } catch (error) {
-        console.error('Failed to save appliances to localStorage:', error);
+        console.error("Failed to save appliances to localStorage:", error);
       }
     }
   }, [appliances, loading, user?.id]);
 
-  const addAppliance = (applianceData: Omit<Appliance, 'id' | 'createdAt'>) => {
+  const addAppliance = (applianceData: Omit<Appliance, "id" | "createdAt">) => {
     const newAppliance: Appliance = {
       ...applianceData,
       id: `appliance-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    setAppliances(prev => [...prev, newAppliance]);
+    setAppliances((prev) => [...prev, newAppliance]);
   };
 
-  const updateAppliance = (id: string, applianceData: Omit<Appliance, 'id' | 'createdAt'>) => {
-    setAppliances(prev => prev.map(appliance => 
-      appliance.id === id 
-        ? { ...appliance, ...applianceData }
-        : appliance
-    ));
+  const updateAppliance = (
+    id: string,
+    applianceData: Omit<Appliance, "id" | "createdAt">
+  ) => {
+    setAppliances((prev) =>
+      prev.map((appliance) =>
+        appliance.id === id ? { ...appliance, ...applianceData } : appliance
+      )
+    );
   };
 
   const deleteAppliance = (id: string) => {
-    setAppliances(prev => prev.filter(appliance => appliance.id !== id));
+    setAppliances((prev) => prev.filter((appliance) => appliance.id !== id));
   };
 
   const completeOnboarding = () => {
     if (user?.id) {
       setHasCompletedOnboarding(true);
-      localStorage.setItem(getOnboardingKey(user.id), 'true');
+      localStorage.setItem(getOnboardingKey(user.id), "true");
     }
   };
 
@@ -104,7 +120,7 @@ export const ApplianceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     deleteAppliance,
     hasCompletedOnboarding,
     completeOnboarding,
-    loading
+    loading,
   };
 
   return (

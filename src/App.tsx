@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ApplianceProvider, useAppliances } from './contexts/ApplianceContext';
-import { LoginPage } from './components/LoginPage';
-import { RegisterPage } from './components/RegisterPage';
-import { ForgotPasswordPage } from './components/ForgotPasswordPage';
-import { OnboardingPage } from './components/OnboardingPage';
-import { AppLayout } from './components/AppLayout';
-import { DashboardPage } from './components/DashboardPage';
-import { ReportsPage } from './components/ReportsPage';
-import { PaymentsPage } from './components/PaymentsPage';
-import { SettingsPage } from './components/SettingsPage';
-import { NotificationCenter } from './components/NotificationCenter';
-import { Toaster } from './components/ui/sonner';
-import { notificationsApi, insightsApi, usageApi } from './lib/mockApi';
+import React, { useState } from "react";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ApplianceProvider, useAppliances } from "./contexts/ApplianceContext";
+import { LoginPage } from "./components/LoginPage";
+import { RegisterPage } from "./components/RegisterPage";
+import { ForgotPasswordPage } from "./components/ForgotPasswordPage";
+import { OnboardingPage } from "./components/OnboardingPage";
+import { AppLayout } from "./components/AppLayout";
+import { DashboardPage } from "./components/DashboardPage";
+import { ReportsPage } from "./components/ReportsPage";
+import { PaymentsPage } from "./components/PaymentsPage";
+import { SettingsPage } from "./components/SettingsPage";
+import { NotificationCenter } from "./components/NotificationCenter";
+import { Toaster } from "./components/ui/sonner";
+import { notificationsApi, insightsApi, usageApi } from "./lib/mockApi";
 
-type AuthScreen = 'login' | 'register' | 'forgot-password';
-type AppPage = 'dashboard' | 'reports' | 'payments' | 'settings';
+type AuthScreen = "login" | "register" | "forgot-password";
+type AppPage = "dashboard" | "reports" | "payments" | "settings";
 
 function AppContent() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const { hasCompletedOnboarding, loading: applianceLoading } = useAppliances();
-  const [authScreen, setAuthScreen] = useState<AuthScreen>('login');
-  const [currentPage, setCurrentPage] = useState<AppPage>('dashboard');
+  const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
+  const [currentPage, setCurrentPage] = useState<AppPage>("dashboard");
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [prediction, setPrediction] = useState<any>(null);
@@ -41,7 +41,7 @@ function AppContent() {
       const data = await notificationsApi.getNotifications();
       setNotifications(data);
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      console.error("Failed to load notifications:", error);
     }
   };
 
@@ -50,43 +50,43 @@ function AppContent() {
       const data = await insightsApi.getPrediction();
       setPrediction(data);
     } catch (error) {
-      console.error('Failed to load prediction:', error);
+      console.error("Failed to load prediction:", error);
     }
   };
 
   const loadActualBill = async () => {
     try {
-      const month = await usageApi.getAggregatedUsage('month');
+      const month = await usageApi.getAggregatedUsage("month");
       setActualBillAmount(month.totalCost);
     } catch (error) {
-      console.error('Failed to load actual bill:', error);
+      console.error("Failed to load actual bill:", error);
     }
   };
 
   const handleMarkNotificationAsRead = async (id: string) => {
     try {
       await notificationsApi.markAsRead(id);
-      setNotifications(notifications.map(n => 
-        n.id === id ? { ...n, read: true } : n
-      ));
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   const handleMarkAllNotificationsAsRead = async () => {
     try {
       await notificationsApi.markAllAsRead();
-      setNotifications(notifications.map(n => ({ ...n, read: true })));
+      setNotifications(notifications.map((n) => ({ ...n, read: true })));
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
   const handleNotificationNavigate = (path: string) => {
-    if (path === '/dashboard') setCurrentPage('dashboard');
-    else if (path === '/payments') setCurrentPage('payments');
-    else if (path === '/settings') setCurrentPage('settings');
+    if (path === "/dashboard") setCurrentPage("dashboard");
+    else if (path === "/payments") setCurrentPage("payments");
+    else if (path === "/settings") setCurrentPage("settings");
   };
 
   // Show loading state
@@ -104,15 +104,17 @@ function AppContent() {
   // Show auth screens if not authenticated
   if (!isAuthenticated) {
     switch (authScreen) {
-      case 'register':
-        return <RegisterPage onSwitchToLogin={() => setAuthScreen('login')} />;
-      case 'forgot-password':
-        return <ForgotPasswordPage onBackToLogin={() => setAuthScreen('login')} />;
+      case "register":
+        return <RegisterPage onSwitchToLogin={() => setAuthScreen("login")} />;
+      case "forgot-password":
+        return (
+          <ForgotPasswordPage onBackToLogin={() => setAuthScreen("login")} />
+        );
       default:
         return (
           <LoginPage
-            onSwitchToRegister={() => setAuthScreen('register')}
-            onSwitchToForgotPassword={() => setAuthScreen('forgot-password')}
+            onSwitchToRegister={() => setAuthScreen("register")}
+            onSwitchToForgotPassword={() => setAuthScreen("forgot-password")}
           />
         );
     }
@@ -124,8 +126,8 @@ function AppContent() {
   }
 
   // Get user preferences
-  const currency = user?.preferences.currency || 'INR';
-  const unreadNotifications = notifications.filter(n => !n.read).length;
+  const currency = user?.preferences.currency || "INR";
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   // Render main app
   return (
@@ -136,16 +138,16 @@ function AppContent() {
         notificationCount={unreadNotifications}
         onNotificationClick={() => setShowNotifications(true)}
       >
-        {currentPage === 'dashboard' && <DashboardPage currency={currency} />}
-        {currentPage === 'reports' && <ReportsPage />}
-        {currentPage === 'payments' && (
+        {currentPage === "dashboard" && <DashboardPage currency={currency} />}
+        {currentPage === "reports" && <ReportsPage />}
+        {currentPage === "payments" && (
           <PaymentsPage
             predictedBill={prediction?.predictedCost || 2284}
             actualBill={actualBillAmount ?? 2410}
             currency={currency}
           />
         )}
-        {currentPage === 'settings' && <SettingsPage />}
+        {currentPage === "settings" && <SettingsPage />}
       </AppLayout>
 
       <NotificationCenter

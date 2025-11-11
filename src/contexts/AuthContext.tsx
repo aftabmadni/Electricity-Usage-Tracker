@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '../lib/types';
-import { authApi } from '../lib/mockApi';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { User } from "../lib/types";
+import { authApi } from "../lib/mockApi";
 
 interface AuthContextType {
   user: User | null;
@@ -17,12 +17,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,15 +33,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check for existing session
     const initAuth = async () => {
       try {
-        const savedToken = localStorage.getItem('wattwise_token');
+        const savedToken = localStorage.getItem("wattwise_token");
         if (savedToken) {
           setToken(savedToken);
           const currentUser = await authApi.getCurrentUser();
           setUser(currentUser);
         }
       } catch (error) {
-        console.error('Auth initialization failed:', error);
-        localStorage.removeItem('wattwise_token');
+        console.error("Auth initialization failed:", error);
+        localStorage.removeItem("wattwise_token");
       } finally {
         setLoading(false);
       }
@@ -53,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { user, token } = await authApi.login(email, password);
       setUser(user);
       setToken(token);
-      localStorage.setItem('wattwise_token', token);
+      localStorage.setItem("wattwise_token", token);
     } catch (error) {
       throw error;
     }
@@ -64,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { user, token } = await authApi.register(email, password, name);
       setUser(user);
       setToken(token);
-      localStorage.setItem('wattwise_token', token);
+      localStorage.setItem("wattwise_token", token);
     } catch (error) {
       throw error;
     }
@@ -75,9 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authApi.logout();
       setUser(null);
       setToken(null);
-      localStorage.removeItem('wattwise_token');
+      localStorage.removeItem("wattwise_token");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -88,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
-    isAuthenticated: !!user && !!token
+    isAuthenticated: !!user && !!token,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

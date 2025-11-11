@@ -1,27 +1,70 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { paymentsApi } from '../lib/mockApi';
-import { Button } from './ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
-import { Plus, Zap, DollarSign, TrendingUp, Lightbulb, Edit, Trash2 } from 'lucide-react';
-import { useAppliances } from '../contexts/ApplianceContext';
-import { calculateApplianceUsage, calculateApplianceSummary, generateApplianceInsights } from '../lib/applianceTypes';
-import { formatCurrency, formatUnits } from '../lib/formatters';
-import { Badge } from './ui/badge';
-import { AddApplianceModal } from './AddApplianceModal';
-import { EditApplianceModal } from './EditApplianceModal';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { paymentsApi } from "../lib/mockApi";
+import { Button } from "./ui/button";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Cell,
+} from "recharts";
+import {
+  Plus,
+  Zap,
+  DollarSign,
+  TrendingUp,
+  Lightbulb,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import { useAppliances } from "../contexts/ApplianceContext";
+import {
+  calculateApplianceUsage,
+  calculateApplianceSummary,
+  generateApplianceInsights,
+} from "../lib/applianceTypes";
+import { formatCurrency, formatUnits } from "../lib/formatters";
+import { Badge } from "./ui/badge";
+import { AddApplianceModal } from "./AddApplianceModal";
+import { EditApplianceModal } from "./EditApplianceModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
+import { toast } from "sonner";
 
 interface ApplianceManagementSectionProps {
-  currency: 'INR' | 'USD' | 'EUR';
+  currency: "INR" | "USD" | "EUR";
 }
 
-export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProps> = ({ currency }) => {
+export const ApplianceManagementSection: React.FC<
+  ApplianceManagementSectionProps
+> = ({ currency }) => {
   const { appliances, deleteAppliance } = useAppliances();
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingApplianceId, setEditingApplianceId] = useState<string | null>(null);
-  const [deletingApplianceId, setDeletingApplianceId] = useState<string | null>(null);
+  const [editingApplianceId, setEditingApplianceId] = useState<string | null>(
+    null
+  );
+  const [deletingApplianceId, setDeletingApplianceId] = useState<string | null>(
+    null
+  );
 
   const costPerKWh = 8; // ₹8 per kWh
   const summary = calculateApplianceSummary(appliances, costPerKWh);
@@ -30,27 +73,33 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
   // Update canonical current month bill whenever appliance summary changes
   useEffect(() => {
     if (summary.totalMonthlyCost > 0) {
-      paymentsApi.updateCurrentMonthBill(summary.totalMonthlyCost)
+      paymentsApi
+        .updateCurrentMonthBill(summary.totalMonthlyCost)
         .catch(console.error);
     }
   }, [summary.totalMonthlyCost]);
 
   // Prepare chart data
-  const chartData = appliances.map(appliance => {
-    const calc = calculateApplianceUsage(appliance, costPerKWh);
-    return {
-      name: appliance.name.length > 15 ? appliance.name.substring(0, 15) + '...' : appliance.name,
-      kWh: calc.monthlyKWh,
-      cost: calc.monthlyCost,
-      color: `hsl(${Math.random() * 360}, 70%, 50%)`
-    };
-  }).sort((a, b) => b.kWh - a.kWh);
+  const chartData = appliances
+    .map((appliance) => {
+      const calc = calculateApplianceUsage(appliance, costPerKWh);
+      return {
+        name:
+          appliance.name.length > 15
+            ? appliance.name.substring(0, 15) + "..."
+            : appliance.name,
+        kWh: calc.monthlyKWh,
+        cost: calc.monthlyCost,
+        color: `hsl(${Math.random() * 360}, 70%, 50%)`,
+      };
+    })
+    .sort((a, b) => b.kWh - a.kWh);
 
   const handleDelete = async () => {
     if (!deletingApplianceId) return;
-    
+
     deleteAppliance(deletingApplianceId);
-    toast.success('Appliance deleted successfully');
+    toast.success("Appliance deleted successfully");
     setDeletingApplianceId(null);
   };
 
@@ -59,10 +108,11 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
       active &&
       Array.isArray(payload) &&
       payload.length > 1 &&
-      payload[0] && payload[1] &&
+      payload[0] &&
+      payload[1] &&
       payload[0].payload &&
-      typeof payload[0].value !== 'undefined' &&
-      typeof payload[1].value !== 'undefined'
+      typeof payload[0].value !== "undefined" &&
+      typeof payload[1].value !== "undefined"
     ) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
@@ -87,7 +137,9 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
             <div className="inline-block p-4 bg-blue-50 rounded-full mb-4">
               <Zap className="w-8 h-8 text-blue-600" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No Appliances Added Yet</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              No Appliances Added Yet
+            </h3>
             <p className="text-gray-600 mb-4">
               Start tracking your energy consumption by adding your appliances
             </p>
@@ -97,9 +149,9 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
             </Button>
           </div>
         </CardContent>
-        <AddApplianceModal 
-          isOpen={showAddModal} 
-          onClose={() => setShowAddModal(false)} 
+        <AddApplianceModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
         />
       </Card>
     );
@@ -114,7 +166,9 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Consumption</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Total Consumption
+                  </p>
                   <p className="text-3xl font-semibold text-blue-600">
                     {formatUnits(summary.totalMonthlyKWh)}
                   </p>
@@ -148,11 +202,15 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Potential Savings</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Potential Savings
+                  </p>
                   <p className="text-3xl font-semibold text-orange-600">
                     {summary.potentialSavingsPercent}%
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">optimization possible</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    optimization possible
+                  </p>
                 </div>
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-white" />
@@ -198,20 +256,27 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
+                  <BarChart
+                    data={chartData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 40 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="name" 
+                    <XAxis
+                      dataKey="name"
                       angle={-45}
                       textAnchor="end"
                       height={80}
                       stroke="#6b7280"
-                      style={{ fontSize: '12px' }}
+                      style={{ fontSize: "12px" }}
                     />
-                    <YAxis 
+                    <YAxis
                       stroke="#6b7280"
-                      style={{ fontSize: '12px' }}
-                      label={{ value: 'kWh', angle: -90, position: 'insideLeft' }}
+                      style={{ fontSize: "12px" }}
+                      label={{
+                        value: "kWh",
+                        angle: -90,
+                        position: "insideLeft",
+                      }}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="kWh" radius={[8, 8, 0, 0]}>
@@ -234,20 +299,27 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
+                  <BarChart
+                    data={chartData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 40 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="name" 
+                    <XAxis
+                      dataKey="name"
                       angle={-45}
                       textAnchor="end"
                       height={80}
                       stroke="#6b7280"
-                      style={{ fontSize: '12px' }}
+                      style={{ fontSize: "12px" }}
                     />
-                    <YAxis 
+                    <YAxis
                       stroke="#6b7280"
-                      style={{ fontSize: '12px' }}
-                      label={{ value: currency, angle: -90, position: 'insideLeft' }}
+                      style={{ fontSize: "12px" }}
+                      label={{
+                        value: currency,
+                        angle: -90,
+                        position: "insideLeft",
+                      }}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="cost" radius={[8, 8, 0, 0]}>
@@ -280,17 +352,18 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {appliances.map(appliance => {
+              {appliances.map((appliance) => {
                 const calc = calculateApplianceUsage(appliance, costPerKWh);
-                const isTopConsumer = summary.topConsumer?.appliance.id === appliance.id;
+                const isTopConsumer =
+                  summary.topConsumer?.appliance.id === appliance.id;
 
                 return (
                   <div
                     key={appliance.id}
                     className={`p-4 rounded-lg border transition-all ${
-                      isTopConsumer 
-                        ? 'border-orange-200 bg-orange-50' 
-                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                      isTopConsumer
+                        ? "border-orange-200 bg-orange-50"
+                        : "border-gray-200 bg-white hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -306,11 +379,15 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                           <div>
                             <p className="text-gray-600">Power</p>
-                            <p className="font-medium">{appliance.powerWatts}W</p>
+                            <p className="font-medium">
+                              {appliance.powerWatts}W
+                            </p>
                           </div>
                           <div>
                             <p className="text-gray-600">Daily Usage</p>
-                            <p className="font-medium">{appliance.hoursPerDay}h/day</p>
+                            <p className="font-medium">
+                              {appliance.hoursPerDay}h/day
+                            </p>
                           </div>
                           <div>
                             <p className="text-gray-600">Monthly Energy</p>
@@ -353,9 +430,9 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
       </div>
 
       {/* Modals */}
-      <AddApplianceModal 
-        isOpen={showAddModal} 
-        onClose={() => setShowAddModal(false)} 
+      <AddApplianceModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
       />
 
       {editingApplianceId && (
@@ -367,17 +444,24 @@ export const ApplianceManagementSection: React.FC<ApplianceManagementSectionProp
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingApplianceId} onOpenChange={() => setDeletingApplianceId(null)}>
+      <AlertDialog
+        open={!!deletingApplianceId}
+        onOpenChange={() => setDeletingApplianceId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Appliance</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this appliance? This action cannot be undone.
+              Are you sure you want to delete this appliance? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

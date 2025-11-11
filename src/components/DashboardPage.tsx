@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { UsageSummaryCards } from './UsageSummaryCards';
-import { PowerTimelineChart } from './PowerTimelineChart';
-import { useAppliances } from '../contexts/ApplianceContext';
-import { PredictionChart } from './PredictionChart';
-import { ComparisonChart } from './ComparisonChart';
-import { DeviceBreakdownChart } from './DeviceBreakdownChart';
-import { CarbonFootprintGauge } from './CarbonFootprintGauge';
-import { SavingStreakWidget } from './SavingStreakWidget';
-import { AIInsightsBox } from './AIInsightsBox';
-import { ApplianceManagementSection } from './ApplianceManagementSection';
-import { usageApi, insightsApi } from '../lib/mockApi';
-import { Appliance } from '../lib/applianceTypes';
-import { 
-  UsageData, 
-  AggregatedUsage, 
-  Prediction, 
-  AIInsight, 
+import React, { useState, useEffect } from "react";
+import { UsageSummaryCards } from "./UsageSummaryCards";
+import { PowerTimelineChart } from "./PowerTimelineChart";
+import { useAppliances } from "../contexts/ApplianceContext";
+import { PredictionChart } from "./PredictionChart";
+import { ComparisonChart } from "./ComparisonChart";
+import { DeviceBreakdownChart } from "./DeviceBreakdownChart";
+import { CarbonFootprintGauge } from "./CarbonFootprintGauge";
+import { SavingStreakWidget } from "./SavingStreakWidget";
+import { AIInsightsBox } from "./AIInsightsBox";
+import { ApplianceManagementSection } from "./ApplianceManagementSection";
+import { usageApi, insightsApi } from "../lib/mockApi";
+import { Appliance } from "../lib/applianceTypes";
+import {
+  UsageData,
+  AggregatedUsage,
+  Prediction,
+  AIInsight,
   DeviceUsage,
   CarbonFootprint,
-  SavingStreak
-} from '../lib/types';
-import { Skeleton } from './ui/skeleton';
-import { Alert, AlertDescription } from './ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { BarChart3, Zap } from 'lucide-react';
+  SavingStreak,
+} from "../lib/types";
+import { Skeleton } from "./ui/skeleton";
+import { Alert, AlertDescription } from "./ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { BarChart3, Zap } from "lucide-react";
 
 interface DashboardPageProps {
-  currency: 'INR' | 'USD' | 'EUR';
+  currency: "INR" | "USD" | "EUR";
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
@@ -38,13 +38,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
   const [usageData, setUsageData] = useState<UsageData[]>([]);
   // Removed todayUsage and weekUsage state, now calculated from appliances
   const [monthUsage, setMonthUsage] = useState<AggregatedUsage | null>(null);
-  const [previousMonthUsage, setPreviousMonthUsage] = useState<AggregatedUsage | null>(null);
+  const [previousMonthUsage, setPreviousMonthUsage] =
+    useState<AggregatedUsage | null>(null);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const { appliances } = useAppliances();
-  const [carbonFootprint, setCarbonFootprint] = useState<CarbonFootprint | null>(null);
+  const [carbonFootprint, setCarbonFootprint] =
+    useState<CarbonFootprint | null>(null);
   const [savingStreak, setSavingStreak] = useState<SavingStreak | null>(null);
-  
+
   // Utility functions for time calculations
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -57,19 +59,24 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-
   // Helper to aggregate appliance usage for a given period
-  function aggregateApplianceUsage(appliances: Appliance[], period: 'today' | 'week' | 'month'): AggregatedUsage {
+  function aggregateApplianceUsage(
+    appliances: Appliance[],
+    period: "today" | "week" | "month"
+  ): AggregatedUsage {
     const costPerKWh = 8;
     const now = new Date();
     let days = 1;
-    if (period === 'week') days = 7;
-    if (period === 'month') days = getDaysInMonth(now);
+    if (period === "week") days = 7;
+    if (period === "month") days = getDaysInMonth(now);
 
     let totalUnits = 0;
-    appliances.forEach(app => {
+    appliances.forEach((app) => {
       // Only count usage for days since appliance was added
-      const daysSinceAdded = Math.min(days, getDaysSinceCreation(app.createdAt));
+      const daysSinceAdded = Math.min(
+        days,
+        getDaysSinceCreation(app.createdAt)
+      );
       const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
       totalUnits += dailyKWh * daysSinceAdded;
     });
@@ -81,13 +88,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
       totalCost: parseFloat(totalCost.toFixed(2)),
       avgDaily: parseFloat(avgDaily.toFixed(2)),
       peakHour: 0,
-      offPeakHour: 0
+      offPeakHour: 0,
     };
   }
 
-  const todayUsage = React.useMemo(() => aggregateApplianceUsage(appliances, 'today'), [appliances]);
-  const weekUsage = React.useMemo(() => aggregateApplianceUsage(appliances, 'week'), [appliances]);
-  const computedMonthUsage = React.useMemo(() => aggregateApplianceUsage(appliances, 'month'), [appliances]);
+  const todayUsage = React.useMemo(
+    () => aggregateApplianceUsage(appliances, "today"),
+    [appliances]
+  );
+  const weekUsage = React.useMemo(
+    () => aggregateApplianceUsage(appliances, "week"),
+    [appliances]
+  );
+  const computedMonthUsage = React.useMemo(
+    () => aggregateApplianceUsage(appliances, "month"),
+    [appliances]
+  );
 
   // Device breakdown for charts (month-to-date)
   const currentDays = React.useMemo(() => {
@@ -100,32 +116,41 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
     const costPerKWh = 8;
     // Calculate current month-to-date usage
     const totalUnits = appliances.reduce((sum, app) => {
-      const daysSinceAdded = Math.min(currentDays, getDaysSinceCreation(app.createdAt));
+      const daysSinceAdded = Math.min(
+        currentDays,
+        getDaysSinceCreation(app.createdAt)
+      );
       const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
-      return sum + (dailyKWh * daysSinceAdded);
+      return sum + dailyKWh * daysSinceAdded;
     }, 0);
-    return appliances.map(app => {
-      const daysSinceAdded = Math.min(currentDays, getDaysSinceCreation(app.createdAt));
-      const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
-      const actualUnits = dailyKWh * daysSinceAdded;
-      const projectedUnits = dailyKWh * daysInMonth;
-      const actualCost = actualUnits * costPerKWh;
-      const projectedCost = projectedUnits * costPerKWh;
-      const percentage = totalUnits > 0 ? (actualUnits / totalUnits) * 100 : 0;
-      return {
-        deviceId: app.id,
-        deviceName: app.name,
-        deviceType: app.name as any,
-        percentage,
-        units: actualUnits,
-        projectedUnits,
-        cost: actualCost,
-        projectedCost,
-        dailyKWh,
-        daysActive: daysSinceAdded,
-        color: `hsl(${Math.random() * 360}, 70%, 50%)`
-      };
-    }).sort((a, b) => b.percentage - a.percentage);
+    return appliances
+      .map((app) => {
+        const daysSinceAdded = Math.min(
+          currentDays,
+          getDaysSinceCreation(app.createdAt)
+        );
+        const dailyKWh = (app.powerWatts * app.hoursPerDay) / 1000;
+        const actualUnits = dailyKWh * daysSinceAdded;
+        const projectedUnits = dailyKWh * daysInMonth;
+        const actualCost = actualUnits * costPerKWh;
+        const projectedCost = projectedUnits * costPerKWh;
+        const percentage =
+          totalUnits > 0 ? (actualUnits / totalUnits) * 100 : 0;
+        return {
+          deviceId: app.id,
+          deviceName: app.name,
+          deviceType: app.name as any,
+          percentage,
+          units: actualUnits,
+          projectedUnits,
+          cost: actualCost,
+          projectedCost,
+          dailyKWh,
+          daysActive: daysSinceAdded,
+          color: `hsl(${Math.random() * 360}, 70%, 50%)`,
+        };
+      })
+      .sort((a, b) => b.percentage - a.percentage);
   }, [appliances, currentDays, daysInMonth]);
 
   useEffect(() => {
@@ -146,38 +171,38 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
         predictionData,
         insightsData,
         carbonData,
-        streakData
+        streakData,
       ] = await Promise.all([
-        usageApi.getUsageData('month'),
-        usageApi.getAggregatedUsage('today'),
-        usageApi.getAggregatedUsage('week'),
-        usageApi.getAggregatedUsage('month'),
+        usageApi.getUsageData("month"),
+        usageApi.getAggregatedUsage("today"),
+        usageApi.getAggregatedUsage("week"),
+        usageApi.getAggregatedUsage("month"),
         insightsApi.getPrediction(),
         insightsApi.getLatestInsights(),
         insightsApi.getCarbonFootprint(),
-        insightsApi.getSavingStreak()
+        insightsApi.getSavingStreak(),
       ]);
 
       // Calculate previous month (mock)
       const prevMonth: AggregatedUsage = {
-        period: 'month',
+        period: "month",
         totalUnits: monthData.totalUnits * 1.125, // 12.5% more last month
         totalCost: monthData.totalCost * 1.125,
         avgDaily: monthData.avgDaily * 1.125,
         peakHour: monthData.peakHour,
-        offPeakHour: monthData.offPeakHour
+        offPeakHour: monthData.offPeakHour,
       };
 
-  setUsageData(allUsageData);
-  setMonthUsage(monthData);
-  setPreviousMonthUsage(prevMonth);
-  setPrediction(predictionData);
-  setInsights(insightsData);
-  setCarbonFootprint(carbonData);
-  setSavingStreak(streakData);
+      setUsageData(allUsageData);
+      setMonthUsage(monthData);
+      setPreviousMonthUsage(prevMonth);
+      setPrediction(predictionData);
+      setInsights(insightsData);
+      setCarbonFootprint(carbonData);
+      setSavingStreak(streakData);
     } catch (err) {
-      setError('Failed to load dashboard data. Please try again.');
-      console.error('Dashboard load error:', err);
+      setError("Failed to load dashboard data. Please try again.");
+      console.error("Dashboard load error:", err);
     } finally {
       setLoading(false);
     }
@@ -186,11 +211,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
   const handleMarkInsightAsRead = async (insightId: string) => {
     try {
       await insightsApi.markInsightAsRead(insightId);
-      setInsights(insights.map(i => 
-        i.id === insightId ? { ...i, read: true } : i
-      ));
+      setInsights(
+        insights.map((i) => (i.id === insightId ? { ...i, read: true } : i))
+      );
     } catch (error) {
-      console.error('Failed to mark insight as read:', error);
+      console.error("Failed to mark insight as read:", error);
     }
   };
 
@@ -262,13 +287,63 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* AI Insights */}
-            <AIInsightsBox 
-              insights={insights} 
+            <AIInsightsBox
+              insights={insights}
               onMarkAsRead={handleMarkInsightAsRead}
             />
-
-            {/* Saving Streak */}
-            {savingStreak && <SavingStreakWidget streak={savingStreak} />}
+            {/* Quick Tips Card with motion and enhanced styles */}
+            <div className="w-full h-full flex items-stretch">
+              <div
+                className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 border border-blue-200 rounded-2xl shadow-lg p-8 flex flex-col justify-center w-full animate-fade-in"
+                style={{
+                  minHeight: "100%",
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                }}
+              >
+                <h2 className="text-2xl font-bold text-indigo-700 mb-4 tracking-tight motion-safe:animate-bounce">
+                  ⚡ Quick Tips for Saving Electricity
+                </h2>
+                <ul className="list-disc list-inside text-gray-800 space-y-3 text-lg w-full max-w-lg">
+                  <li className="transition-all duration-300 hover:scale-105 hover:text-blue-600">
+                    Run high-power appliances (like washing machines) during
+                    off-peak hours to save on costs.
+                  </li>
+                  <li className="transition-all duration-300 hover:scale-105 hover:text-blue-600">
+                    Set your AC to 25°C for optimal efficiency and savings.
+                  </li>
+                  <li className="transition-all duration-300 hover:scale-105 hover:text-blue-600">
+                    Switch off lights and devices when not in use.
+                  </li>
+                  <li className="transition-all duration-300 hover:scale-105 hover:text-blue-600">
+                    Use energy-efficient LED bulbs and appliances.
+                  </li>
+                  <li className="transition-all duration-300 hover:scale-105 hover:text-blue-600">
+                    Regularly check appliance health and maintenance.
+                  </li>
+                  <li className="transition-all duration-300 hover:scale-105 hover:text-blue-600">
+                    Track your usage with WattWise to spot saving opportunities!
+                  </li>
+                </ul>
+                <div
+                  className="mt-6 flex justify-center w-full"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 32,
+                  }}
+                >
+                  <span className="inline-block px-4 py-2 bg-indigo-600 text-black rounded-full shadow-md text-base font-semibold motion-safe:animate-pulse">
+                    Empower your home, save energy!
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Prediction Chart */}
@@ -285,8 +360,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
             {/* Month Comparison */}
             {computedMonthUsage && previousMonthUsage && (
               <ComparisonChart
-                currentMonth={{ units: computedMonthUsage.totalUnits, cost: computedMonthUsage.totalCost }}
-                previousMonth={{ units: previousMonthUsage.totalUnits, cost: previousMonthUsage.totalCost }}
+                currentMonth={{
+                  units: computedMonthUsage.totalUnits,
+                  cost: computedMonthUsage.totalCost,
+                }}
+                previousMonth={{
+                  units: previousMonthUsage.totalUnits,
+                  cost: previousMonthUsage.totalCost,
+                }}
                 currency={currency}
               />
             )}
@@ -296,7 +377,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currency }) => {
           </div>
 
           {/* Carbon Footprint */}
-          {carbonFootprint && <CarbonFootprintGauge footprint={carbonFootprint} />}
+          {carbonFootprint && (
+            <CarbonFootprintGauge footprint={carbonFootprint} />
+          )}
         </TabsContent>
 
         {/* Appliances Tab */}

@@ -1,12 +1,36 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Download, FileText, FileSpreadsheet, Calendar, TrendingDown, Zap } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { reportsApi } from '../lib/mockApi';
-import { downloadFile, getCurrentMonth, formatCurrency, formatUnits } from '../lib/formatters';
-import { toast } from 'sonner';
-import { Badge } from './ui/badge';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import {
+  Download,
+  FileText,
+  FileSpreadsheet,
+  Calendar,
+  TrendingDown,
+  Zap,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { reportsApi } from "../lib/mockApi";
+import {
+  downloadFile,
+  getCurrentMonth,
+  formatCurrency,
+  formatUnits,
+} from "../lib/formatters";
+import { toast } from "sonner";
+import { Badge } from "./ui/badge";
 
 export const ReportsPage: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
@@ -14,34 +38,37 @@ export const ReportsPage: React.FC = () => {
 
   const months = [
     getCurrentMonth(),
-    'October 2024',
-    'September 2024',
-    'August 2024',
-    'July 2024',
-    'June 2024'
+    "October 2024",
+    "September 2024",
+    "August 2024",
+    "July 2024",
+    "June 2024",
   ];
 
   const handleExportPDF = async () => {
     setLoading(true);
     try {
       const blob = await reportsApi.exportToPDF(selectedMonth);
-      downloadFile(blob, `wattwise-report-${selectedMonth.replace(' ', '-')}.pdf`);
-      toast.success('PDF report downloaded successfully');
+      downloadFile(
+        blob,
+        `wattwise-report-${selectedMonth.replace(" ", "-")}.pdf`
+      );
+      toast.success("PDF report downloaded successfully");
     } catch (error) {
-      toast.error('Failed to generate PDF report');
+      toast.error("Failed to generate PDF report");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleExportCSV = async (range: 'month' | 'year') => {
+  const handleExportCSV = async (range: "month" | "year") => {
     setLoading(true);
     try {
       const blob = await reportsApi.exportToCSV(range);
       downloadFile(blob, `wattwise-usage-${range}-${Date.now()}.csv`);
-      toast.success('CSV data exported successfully');
+      toast.success("CSV data exported successfully");
     } catch (error) {
-      toast.error('Failed to export CSV data');
+      toast.error("Failed to export CSV data");
     } finally {
       setLoading(false);
     }
@@ -52,9 +79,9 @@ export const ReportsPage: React.FC = () => {
     totalUnits: 301.2,
     totalCost: 2410,
     avgDaily: 10.04,
-    peakDay: 'Oct 15, 2024',
+    peakDay: "Oct 15, 2024",
     savingsVsLastMonth: 12.5,
-    co2Saved: 34.5
+    co2Saved: 34.5,
   };
 
   return (
@@ -125,9 +152,7 @@ export const ReportsPage: React.FC = () => {
               <p className="text-2xl font-semibold text-green-900">
                 {reportSummary.savingsVsLastMonth}%
               </p>
-              <p className="text-sm text-green-600 mt-1">
-                vs previous month
-              </p>
+              <p className="text-sm text-green-600 mt-1">vs previous month</p>
             </div>
 
             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -138,20 +163,22 @@ export const ReportsPage: React.FC = () => {
               <p className="text-lg font-semibold text-purple-900">
                 {reportSummary.peakDay}
               </p>
-              <p className="text-sm text-purple-600 mt-1">
-                Highest usage
-              </p>
+              <p className="text-sm text-purple-600 mt-1">Highest usage</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 border border-gray-200 rounded-lg">
               <p className="text-xs text-gray-600 mb-1">Average Daily Usage</p>
-              <p className="text-lg font-semibold">{formatUnits(reportSummary.avgDaily)}</p>
+              <p className="text-lg font-semibold">
+                {formatUnits(reportSummary.avgDaily)}
+              </p>
             </div>
             <div className="p-3 border border-gray-200 rounded-lg">
               <p className="text-xs text-gray-600 mb-1">CO₂ Saved</p>
-              <p className="text-lg font-semibold">{reportSummary.co2Saved} kg</p>
+              <p className="text-lg font-semibold">
+                {reportSummary.co2Saved} kg
+              </p>
             </div>
           </div>
         </CardContent>
@@ -188,13 +215,13 @@ export const ReportsPage: React.FC = () => {
                 ✓ Carbon footprint analysis
               </p>
             </div>
-            <Button 
-              onClick={handleExportPDF} 
+            <Button
+              onClick={handleExportPDF}
               disabled={loading}
               className="w-full gap-2"
             >
               <Download size={16} />
-              {loading ? 'Generating...' : 'Download PDF Report'}
+              {loading ? "Generating..." : "Download PDF Report"}
             </Button>
           </CardContent>
         </Card>
@@ -215,12 +242,8 @@ export const ReportsPage: React.FC = () => {
               <p className="flex items-center gap-2">
                 ✓ Timestamp-level granular data
               </p>
-              <p className="flex items-center gap-2">
-                ✓ Units consumed (kWh)
-              </p>
-              <p className="flex items-center gap-2">
-                ✓ Cost breakdown
-              </p>
+              <p className="flex items-center gap-2">✓ Units consumed (kWh)</p>
+              <p className="flex items-center gap-2">✓ Cost breakdown</p>
               <p className="flex items-center gap-2">
                 ✓ Device ID and metadata
               </p>
@@ -229,8 +252,8 @@ export const ReportsPage: React.FC = () => {
               </p>
             </div>
             <div className="space-y-2">
-              <Button 
-                onClick={() => handleExportCSV('month')} 
+              <Button
+                onClick={() => handleExportCSV("month")}
                 disabled={loading}
                 variant="outline"
                 className="w-full gap-2"
@@ -238,8 +261,8 @@ export const ReportsPage: React.FC = () => {
                 <Download size={16} />
                 Export Month Data (CSV)
               </Button>
-              <Button 
-                onClick={() => handleExportCSV('year')} 
+              <Button
+                onClick={() => handleExportCSV("year")}
                 disabled={loading}
                 variant="outline"
                 className="w-full gap-2"
@@ -263,9 +286,13 @@ export const ReportsPage: React.FC = () => {
         <CardContent>
           <div className="space-y-3">
             {[
-              { month: 'October 2024', date: '5 days ago', type: 'PDF' },
-              { month: 'September 2024', date: '35 days ago', type: 'PDF & CSV' },
-              { month: 'August 2024', date: '65 days ago', type: 'PDF' }
+              { month: "October 2024", date: "5 days ago", type: "PDF" },
+              {
+                month: "September 2024",
+                date: "35 days ago",
+                type: "PDF & CSV",
+              },
+              { month: "August 2024", date: "65 days ago", type: "PDF" },
             ].map((report, index) => (
               <div
                 key={index}
